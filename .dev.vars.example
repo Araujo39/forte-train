@@ -1,0 +1,18 @@
+# Environment Variables for Local Development
+# DO NOT commit this file to version control
+
+# OpenAI API Key (for AI workout generation and Vision module)
+OPENAI_API_KEY=your-openai-api-key-here
+
+# YouTube Data API v3 Key (for equipment video search)
+YOUTUBE_API_KEY=your-youtube-api-key-here
+
+# JWT Secret (for authentication)
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+# Stripe API Keys (for payments)
+STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+
+# WhatsApp API (optional - for notifications)
+WHATSAPP_API_TOKEN=your-whatsapp-business-api-token
