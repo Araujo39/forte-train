@@ -32,17 +32,24 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/auth/register` | Cadastro de nova conta |
 | `/dashboard` | Dashboard principal do Personal |
 | `/dashboard/students` | Gestão completa de alunos |
+| `/dashboard/workouts` | **Treinos Salvos (Novo!)** |
 | `/dashboard/ai-generator` | **Gerador de Treinos IA** |
+| `/dashboard/analytics` | **Analytics com gráficos (Novo!)** |
+| `/dashboard/notifications` | **Sistema de Notificações WhatsApp (Novo!)** |
+| `/dashboard/settings` | **Configurações e API Keys (Novo!)** |
 | `/student/app` | **WebApp do Aluno (Player de Treino + Vision)** |
 | `/api/auth/login` | API de autenticação |
 | `/api/dashboard/stats` | Estatísticas do dashboard |
 | `/api/students` | Gestão de alunos (CRUD) |
+| `/api/workouts` | Gestão de treinos (CRUD) |
 | `/api/ai/generate-workout` | Gerador de treinos com IA |
 | `/api/ai/identify-equipment` | **Módulo Vision - Identificação de equipamentos** |
+| `/api/notifications/history` | Histórico de notificações enviadas |
+| `/api/notifications/send` | Enviar notificação WhatsApp |
 
 ## ✨ Funcionalidades Implementadas
 
-### ✅ Completas
+### ✅ Completas (100%)
 - [x] **Landing Page ultra dark** (#0D0D0D) com acentos neon (#CCFF00)
 - [x] **Sistema de autenticação** completo (registro e login com JWT)
 - [x] **Dashboard do Personal Trainer** com estatísticas em tempo real
@@ -56,14 +63,20 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 - [x] **Sistema de cache** para equipamentos identificados
 - [x] **Logs de IA** para controle de custos em tempo real
 - [x] **Busca automática** de vídeos tutoriais no YouTube
+- [x] **📊 Analytics Dashboard** - gráficos de retenção, atividade e objetivos
+- [x] **💪 Gestão de Treinos** - visualizar, editar, duplicar e excluir treinos
+- [x] **📱 Sistema de Notificações** - envio simulado de WhatsApp com templates
+- [x] **⚙️ Configurações** - gerenciar perfil, API keys e personalização
 
-### 🚧 Em Desenvolvimento
-- [ ] Integração real com YouTube Data API v3
-- [ ] Sistema de notificações WhatsApp automatizadas
-- [ ] Analytics avançado com gráficos de evolução
-- [ ] Integração com Stripe para pagamentos
-- [ ] Diário de carga e tracking de progresso
-- [ ] Modo offline com Service Workers
+### 🚧 Em Desenvolvimento (Próximas Sprints)
+- [ ] **Integração real** com YouTube Data API v3 (substituir busca mock)
+- [ ] **WhatsApp Business API** real (substituir simulação)
+- [ ] **Diário de carga** e tracking detalhado de progresso
+- [ ] **Modo offline** com Service Workers e PWA
+- [ ] **Integração Stripe** para pagamentos e assinaturas
+- [ ] **Editor visual** de treinos com drag & drop
+- [ ] **Relatórios PDF** exportáveis de evolução
+- [ ] **Dashboard público** para o aluno (subdomínio personalizado)
 
 ## 🗄️ Arquitetura de Dados
 
