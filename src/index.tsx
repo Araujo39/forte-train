@@ -23,11 +23,13 @@ import { authRoutes } from './routes/auth'
 import { dashboardRoutes } from './routes/dashboard'
 import { apiRoutes } from './routes/api'
 import { studentRoutes } from './routes/student'
+import { analyticsRoute } from './routes/analytics'
 
 // Mount routes
 app.route('/', landingRoutes)
 app.route('/auth', authRoutes)
 app.route('/dashboard', dashboardRoutes)
+app.route('/dashboard/analytics', analyticsRoute)
 app.route('/api', apiRoutes)
 app.route('/student', studentRoutes)
 
