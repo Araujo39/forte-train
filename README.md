@@ -18,7 +18,13 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 
 ## 🌐 URLs do Projeto
 
-### 🔗 Ambiente de Desenvolvimento
+### 🔗 **PRODUÇÃO (Cloudflare Pages)** ⭐
+- **URL Principal**: https://fortetrain.pages.dev
+- **Dashboard**: https://fortetrain.pages.dev/dashboard
+- **Login**: https://fortetrain.pages.dev/auth/login
+- **Status**: ✅ **ONLINE E FUNCIONANDO**
+
+### 🔧 Ambiente de Desenvolvimento
 - **URL Pública**: https://3000-ique5rgckdb5657g94zcc-2e77fc33.sandbox.novita.ai
 - **API Base**: https://3000-ique5rgckdb5657g94zcc-2e77fc33.sandbox.novita.ai/api
 - **Dashboard**: https://3000-ique5rgckdb5657g94zcc-2e77fc33.sandbox.novita.ai/dashboard
@@ -336,3 +342,42 @@ Copyright © 2026 ForteTrain. Todos os direitos reservados.
 **Desenvolvido com ❤️ e ☕ por André Silva**
 
 *Transformando Personal Trainers em empresas de alta performance através da Inteligência Artificial*
+
+## 🚀 Deploy em Produção
+
+### ✅ Status: ONLINE
+- **Plataforma**: Cloudflare Pages
+- **URL**: https://fortetrain.pages.dev
+- **Database**: Cloudflare D1 (c31185f7-4b89-4f7c-a1bb-05010db70cd0)
+- **Region**: ENAM (East North America)
+- **Deploy Date**: 17 de Março de 2026
+
+### 🔐 Credenciais de Demo (Produção)
+- **Email**: andre@fortetrain.app
+- **Senha**: demo123
+
+### 📊 Configuração de Produção
+- ✅ Database D1 criado e populado
+- ✅ Migrations aplicadas (7 tabelas)
+- ✅ Seed data inserido (1 tenant, 3 students, 2 workouts)
+- ✅ Environment variables configuradas:
+  - OPENAI_API_KEY ⚠️ (substituir por chave real)
+  - YOUTUBE_API_KEY ⚠️ (substituir por chave real)
+  - JWT_SECRET ✅ (configurado para produção)
+
+### ⚠️ Próximos Passos Críticos
+1. **Substituir OPENAI_API_KEY** por chave real:
+   ```bash
+   echo "sua-chave-real" | npx wrangler pages secret put OPENAI_API_KEY --project-name fortetrain
+   ```
+
+2. **Substituir YOUTUBE_API_KEY** por chave real:
+   ```bash
+   echo "sua-chave-real" | npx wrangler pages secret put YOUTUBE_API_KEY --project-name fortetrain
+   ```
+
+3. **Apontar domínio customizado**:
+   ```bash
+   npx wrangler pages domain add fortetrain.com --project-name fortetrain
+   ```
+
