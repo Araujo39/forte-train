@@ -1,7 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fortetrain",
-  "main": "src/index.tsx",
   "compatibility_date": "2024-01-01",
   "compatibility_flags": ["nodejs_compat"],
   "pages_build_output_dir": "./dist",
@@ -10,7 +9,7 @@
     {
       "binding": "DB",
       "database_name": "fortetrain-db",
-      "database_id": "placeholder-will-be-created",
+      "database_id": "c31185f7-4b89-4f7c-a1bb-05010db70cd0",
       "migrations_dir": "./migrations"
     }
   ]
