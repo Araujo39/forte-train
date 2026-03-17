@@ -10,7 +10,7 @@ landingRoutes.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>FitFlow - IA para Personal Trainers</title>
+        <title>ForteTrain - IA para Personal Trainers</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -66,7 +66,7 @@ landingRoutes.get('/', (c) => {
                 <div class="flex justify-between items-center h-16">
                     <div class="flex items-center">
                         <i class="fas fa-dumbbell text-3xl" style="color: #CCFF00;"></i>
-                        <span class="ml-3 text-2xl font-bold gradient-text">FitFlow</span>
+                        <span class="ml-3 text-2xl font-bold gradient-text">ForteTrain</span>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
                         <a href="#features" class="text-gray-300 hover:text-white transition">Recursos</a>
@@ -86,7 +86,7 @@ landingRoutes.get('/', (c) => {
                     <i class="fas fa-robot text-8xl" style="color: #CCFF00;"></i>
                 </div>
                 <h1 class="text-6xl md:text-8xl font-bold mb-6 glow-text" style="color: #CCFF00;">
-                    FitFlow SaaS
+                    ForteTrain SaaS
                 </h1>
                 <p class="text-2xl md:text-3xl text-gray-300 mb-4">
                     Inteligência Artificial para Personal Trainers
@@ -301,10 +301,10 @@ landingRoutes.get('/', (c) => {
             <div class="max-w-7xl mx-auto text-center text-gray-400">
                 <div class="flex items-center justify-center mb-4">
                     <i class="fas fa-dumbbell text-2xl mr-2" style="color: #CCFF00;"></i>
-                    <span class="text-xl font-bold text-white">FitFlow SaaS</span>
+                    <span class="text-xl font-bold text-white">ForteTrain SaaS</span>
                 </div>
                 <p class="mb-4">Inteligência Artificial para Personal Trainers</p>
-                <p class="text-sm">&copy; 2026 FitFlow. Todos os direitos reservados.</p>
+                <p class="text-sm">&copy; 2026 ForteTrain. Todos os direitos reservados.</p>
                 <div class="mt-6 space-x-6">
                     <a href="#" class="hover:text-white transition">Termos de Uso</a>
                     <a href="#" class="hover:text-white transition">Política de Privacidade</a>

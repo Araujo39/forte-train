@@ -1,11 +1,11 @@
-# 🚀 FitFlow SaaS - Guia Rápido de Demonstração
+# 🚀 ForteTrain SaaS - Guia Rápido de Demonstração
 
 ## 📱 Acesso Rápido
 
 **URL Principal**: https://3000-ique5rgckdb5657g94zcc-2e77fc33.sandbox.novita.ai
 
 **Conta Demo**:
-- Email: `andre@fitflow.app`
+- Email: `andre@fortetrain.app`
 - Senha: `demo123`
 
 ---
@@ -175,7 +175,7 @@ JWT_SECRET=demo-jwt-secret-change-in-production
 
 ### Personal Trainer
 - Nome: André Silva
-- Email: andre@fitflow.app
+- Email: andre@fortetrain.app
 - Plano: Pro (Ilimitado)
 
 ### Alunos
@@ -244,7 +244,7 @@ JWT_SECRET=demo-jwt-secret-change-in-production
 ## 📞 Contato e Suporte
 
 **Desenvolvedor**: André Silva  
-**Email**: andre@fitflow.app  
+**Email**: andre@fortetrain.app  
 **GitHub**: [Link do repositório]  
 **Documentação**: README.md completo  
 

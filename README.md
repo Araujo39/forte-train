@@ -1,12 +1,12 @@
-# FitFlow SaaS - Inteligência Artificial para Personal Trainers
+# ForteTrain SaaS - Inteligência Artificial para Personal Trainers
 
-![FitFlow Logo](https://img.shields.io/badge/FitFlow-SaaS-CCFF00?style=for-the-badge&logo=dumbbell)
+![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-SaaS-CCFF00?style=for-the-badge&logo=dumbbell)
 ![Status](https://img.shields.io/badge/Status-MVP-success?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-1.0-blue?style=for-the-badge)
 
 ## 🚀 Visão Geral
 
-O **FitFlow** é um ecossistema digital SaaS B2B2C que permite a Personal Trainers gerirem múltiplos alunos, prescreverem treinos otimizados por IA e automatizarem a retenção via notificações inteligentes.
+O **ForteTrain** é um ecossistema digital SaaS B2B2C que permite a Personal Trainers gerirem múltiplos alunos, prescreverem treinos otimizados por IA e automatizarem a retenção via notificações inteligentes.
 
 ### 🎯 Diferenciais
 
@@ -164,7 +164,7 @@ npm run dev:d1
 3. **Criar Conta**: http://localhost:3000/auth/register
 
 ### Conta Demo
-- **Email**: andre@fitflow.app
+- **Email**: andre@fortetrain.app
 - **Senha**: demo123
 
 ## 📦 Scripts Disponíveis
@@ -275,7 +275,7 @@ npm run test            # Testar servidor local
 
 ## 🏆 Lançamento: Arnold Sports Festival 2026
 
-O FitFlow foi desenvolvido para lançamento no Arnold Sports Festival 2026 em São Paulo, com foco em:
+O ForteTrain foi desenvolvido para lançamento no Arnold Sports Festival 2026 em São Paulo, com foco em:
 
 - ⚡ **Speed-to-Workout**: Treino em 30s usando voz
 - 📱 **WhatsApp Integrado**: PDF e link do app direto no Zap
@@ -298,13 +298,13 @@ O FitFlow foi desenvolvido para lançamento no Arnold Sports Festival 2026 em S�
 
 ```bash
 # Ver logs em tempo real
-pm2 logs fitflow-saas --nostream
+pm2 logs fortetrain-saas --nostream
 
 # Restart da aplicação
-fuser -k 3000/tcp && pm2 restart fitflow-saas
+fuser -k 3000/tcp && pm2 restart fortetrain-saas
 
 # Rebuild após mudanças
-npm run build && pm2 restart fitflow-saas
+npm run build && pm2 restart fortetrain-saas
 
 # Consultar banco de dados
 npm run db:console:local
@@ -312,11 +312,11 @@ npm run db:console:local
 
 ## 🤝 Contribuindo
 
-Este é um projeto proprietário desenvolvido para o Arnold Sports Festival 2026. Para questões de desenvolvimento, contate o time do FitFlow.
+Este é um projeto proprietário desenvolvido para o Arnold Sports Festival 2026. Para questões de desenvolvimento, contate o time do ForteTrain.
 
 ## 📄 Licença
 
-Copyright © 2026 FitFlow SaaS. Todos os direitos reservados.
+Copyright © 2026 ForteTrain SaaS. Todos os direitos reservados.
 
 ---
 

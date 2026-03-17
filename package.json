@@ -1,23 +1,23 @@
 {
-  "name": "fitflow-saas",
+  "name": "fortetrain",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "dev:sandbox": "wrangler pages dev dist --ip 0.0.0.0 --port 3000",
-    "dev:d1": "wrangler pages dev dist --d1=fitflow-db --local --ip 0.0.0.0 --port 3000",
+    "dev:d1": "wrangler pages dev dist --d1=fortetrain-db --local --ip 0.0.0.0 --port 3000",
     "build": "vite build",
     "preview": "wrangler pages dev dist",
     "deploy": "npm run build && wrangler pages deploy dist",
-    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name fitflow-saas",
+    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name fortetrain",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
     "test": "curl http://localhost:3000",
-    "db:migrate:local": "wrangler d1 migrations apply fitflow-db --local",
-    "db:migrate:prod": "wrangler d1 migrations apply fitflow-db",
-    "db:seed": "wrangler d1 execute fitflow-db --local --file=./seed.sql",
+    "db:migrate:local": "wrangler d1 migrations apply fortetrain-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply fortetrain-db",
+    "db:seed": "wrangler d1 execute fortetrain-db --local --file=./seed.sql",
     "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed",
-    "db:console:local": "wrangler d1 execute fitflow-db --local",
-    "db:console:prod": "wrangler d1 execute fitflow-db"
+    "db:console:local": "wrangler d1 execute fortetrain-db --local",
+    "db:console:prod": "wrangler d1 execute fortetrain-db"
   },
   "dependencies": {
     "hono": "^4.12.8"

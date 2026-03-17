@@ -1,4 +1,4 @@
--- FitFlow SaaS Database Schema
+-- ForteTrain SaaS Database Schema
 -- Multi-tenant Architecture with Row Level Security
 
 -- 1. TABELA DE PERSONAIS (TENANTS)

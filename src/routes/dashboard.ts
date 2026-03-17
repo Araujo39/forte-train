@@ -10,7 +10,7 @@ dashboardRoutes.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard - FitFlow</title>
+        <title>Dashboard - ForteTrain</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -61,7 +61,7 @@ dashboardRoutes.get('/', (c) => {
                 <div class="p-6">
                     <div class="flex items-center mb-8">
                         <i class="fas fa-dumbbell text-3xl" style="color: #CCFF00;"></i>
-                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">FitFlow</span>
+                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">ForteTrain</span>
                     </div>
 
                     <nav class="space-y-2">
@@ -201,8 +201,8 @@ dashboardRoutes.get('/', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
             // Check authentication
-            const token = localStorage.getItem('fitflow_token');
-            const user = JSON.parse(localStorage.getItem('fitflow_user') || '{}');
+            const token = localStorage.getItem('fortetrain_token');
+            const user = JSON.parse(localStorage.getItem('fortetrain_user') || '{}');
 
             if (!token) {
                 window.location.href = '/auth/login';
@@ -346,7 +346,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gerador de Treinos IA - FitFlow</title>
+        <title>Gerador de Treinos IA - ForteTrain</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -417,7 +417,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
                 <div class="p-6">
                     <div class="flex items-center mb-8">
                         <i class="fas fa-dumbbell text-3xl" style="color: #CCFF00;"></i>
-                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">FitFlow</span>
+                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">ForteTrain</span>
                     </div>
 
                     <nav class="space-y-2">
@@ -623,7 +623,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
-            const token = localStorage.getItem('fitflow_token');
+            const token = localStorage.getItem('fortetrain_token');
             if (!token) {
                 window.location.href = '/auth/login';
             }
@@ -781,7 +781,7 @@ dashboardRoutes.get('/students', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gestão de Alunos - FitFlow</title>
+        <title>Gestão de Alunos - ForteTrain</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -858,7 +858,7 @@ dashboardRoutes.get('/students', (c) => {
                 <div class="p-6">
                     <div class="flex items-center mb-8">
                         <i class="fas fa-dumbbell text-3xl" style="color: #CCFF00;"></i>
-                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">FitFlow</span>
+                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">ForteTrain</span>
                     </div>
 
                     <nav class="space-y-2">
@@ -1022,7 +1022,7 @@ dashboardRoutes.get('/students', (c) => {
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
-            const token = localStorage.getItem('fitflow_token');
+            const token = localStorage.getItem('fortetrain_token');
             if (!token) {
                 window.location.href = '/auth/login';
             }

@@ -10,7 +10,7 @@ authRoutes.get('/login', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login - FitFlow</title>
+        <title>Login - ForteTrain</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -51,7 +51,7 @@ authRoutes.get('/login', (c) => {
             <div class="text-center mb-8">
                 <a href="/" class="inline-flex items-center">
                     <i class="fas fa-dumbbell text-4xl" style="color: #CCFF00;"></i>
-                    <span class="ml-3 text-3xl font-bold" style="color: #CCFF00;">FitFlow</span>
+                    <span class="ml-3 text-3xl font-bold" style="color: #CCFF00;">ForteTrain</span>
                 </a>
                 <p class="mt-2 text-gray-400">Entre na sua conta</p>
             </div>
@@ -128,8 +128,8 @@ authRoutes.get('/login', (c) => {
                     });
 
                     if (response.data.token) {
-                        localStorage.setItem('fitflow_token', response.data.token);
-                        localStorage.setItem('fitflow_user', JSON.stringify(response.data.user));
+                        localStorage.setItem('fortetrain_token', response.data.token);
+                        localStorage.setItem('fortetrain_user', JSON.stringify(response.data.user));
                         window.location.href = '/dashboard';
                     }
                 } catch (error) {
@@ -138,7 +138,7 @@ authRoutes.get('/login', (c) => {
             });
 
             function loginDemo() {
-                document.getElementById('email').value = 'andre@fitflow.app';
+                document.getElementById('email').value = 'andre@fortetrain.app';
                 document.getElementById('password').value = 'demo123';
                 document.getElementById('loginForm').dispatchEvent(new Event('submit'));
             }
@@ -158,7 +158,7 @@ authRoutes.get('/register', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Criar Conta - FitFlow</title>
+        <title>Criar Conta - ForteTrain</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -199,7 +199,7 @@ authRoutes.get('/register', (c) => {
             <div class="text-center mb-8">
                 <a href="/" class="inline-flex items-center">
                     <i class="fas fa-dumbbell text-4xl" style="color: #CCFF00;"></i>
-                    <span class="ml-3 text-3xl font-bold" style="color: #CCFF00;">FitFlow</span>
+                    <span class="ml-3 text-3xl font-bold" style="color: #CCFF00;">ForteTrain</span>
                 </a>
                 <p class="mt-2 text-gray-400">Crie sua conta - 14 dias grátis</p>
             </div>
@@ -257,7 +257,7 @@ authRoutes.get('/register', (c) => {
                                 class="input-dark flex-1 px-4 py-3 rounded-l-lg"
                                 placeholder="seu-nome"
                             />
-                            <span class="bg-gray-800 px-4 py-3 rounded-r-lg text-gray-400">.fitflow.app</span>
+                            <span class="bg-gray-800 px-4 py-3 rounded-r-lg text-gray-400">.fortetrain.app</span>
                         </div>
                     </div>
 
@@ -305,8 +305,8 @@ authRoutes.get('/register', (c) => {
                     });
 
                     if (response.data.token) {
-                        localStorage.setItem('fitflow_token', response.data.token);
-                        localStorage.setItem('fitflow_user', JSON.stringify(response.data.user));
+                        localStorage.setItem('fortetrain_token', response.data.token);
+                        localStorage.setItem('fortetrain_user', JSON.stringify(response.data.user));
                         alert('Conta criada com sucesso! Redirecionando...');
                         window.location.href = '/dashboard';
                     }
