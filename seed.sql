@@ -1,9 +1,10 @@
 -- Seed Data for FitFlow SaaS Demo
 
 -- Insert demo tenant (Personal Trainer)
+-- Password: demo123 (SHA-256 hash)
 INSERT OR IGNORE INTO tenants (id, name, email, password_hash, subdomain, plan_type, plan_status) 
 VALUES 
-  ('tenant-demo-1', 'André Silva', 'andre@fitflow.app', '$2a$10$demo.password.hash', 'andre', 'pro', 'active');
+  ('tenant-demo-1', 'André Silva', 'andre@fitflow.app', 'd3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791', 'andre', 'pro', 'active');
 
 -- Insert demo students
 INSERT OR IGNORE INTO students (id, tenant_id, full_name, email, whatsapp, goal, physical_data, status, last_workout_date)
