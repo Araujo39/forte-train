@@ -576,3 +576,257 @@ apiRoutes.post('/ai/identify-equipment', async (c) => {
     return c.json({ error: 'Failed to identify equipment' }, 500)
   }
 })
+
+// ==================== WORKOUTS ROUTES ====================
+
+// Get all workouts for tenant
+apiRoutes.get('/workouts', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+
+    // Get all workouts for this tenant
+    const result = await c.env.DB.prepare(`
+      SELECT * FROM workouts WHERE tenant_id = ? ORDER BY created_at DESC
+    `).bind(tenantId).all()
+
+    return c.json(result.results || [])
+  } catch (error) {
+    console.error('Get workouts error:', error)
+    return c.json({ error: 'Failed to fetch workouts' }, 500)
+  }
+})
+
+// Create workout
+apiRoutes.post('/workouts', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+    const { student_id, title, description, exercises, ai_logic_used } = await c.req.json()
+
+    // Validate required fields
+    if (!student_id || !title || !exercises) {
+      return c.json({ error: 'Missing required fields' }, 400)
+    }
+
+    const workoutId = generateId()
+    const now = Math.floor(Date.now() / 1000)
+
+    await c.env.DB.prepare(`
+      INSERT INTO workouts (id, student_id, tenant_id, title, description, exercises, ai_logic_used, is_active, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
+    `).bind(
+      workoutId,
+      student_id,
+      tenantId,
+      title,
+      description || null,
+      typeof exercises === 'string' ? exercises : JSON.stringify(exercises),
+      ai_logic_used || null,
+      now,
+      now
+    ).run()
+
+    return c.json({
+      success: true,
+      workoutId,
+      message: 'Workout created successfully'
+    })
+  } catch (error) {
+    console.error('Create workout error:', error)
+    return c.json({ error: 'Failed to create workout' }, 500)
+  }
+})
+
+// Update workout
+apiRoutes.put('/workouts/:id', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+    const workoutId = c.req.param('id')
+    const { title, description, exercises, is_active } = await c.req.json()
+
+    const now = Math.floor(Date.now() / 1000)
+
+    await c.env.DB.prepare(`
+      UPDATE workouts 
+      SET title = ?, description = ?, exercises = ?, is_active = ?, updated_at = ?
+      WHERE id = ? AND tenant_id = ?
+    `).bind(
+      title,
+      description || null,
+      typeof exercises === 'string' ? exercises : JSON.stringify(exercises),
+      is_active ? 1 : 0,
+      now,
+      workoutId,
+      tenantId
+    ).run()
+
+    return c.json({
+      success: true,
+      message: 'Workout updated successfully'
+    })
+  } catch (error) {
+    console.error('Update workout error:', error)
+    return c.json({ error: 'Failed to update workout' }, 500)
+  }
+})
+
+// Delete workout
+apiRoutes.delete('/workouts/:id', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+    const workoutId = c.req.param('id')
+
+    await c.env.DB.prepare(`
+      DELETE FROM workouts WHERE id = ? AND tenant_id = ?
+    `).bind(workoutId, tenantId).run()
+
+    return c.json({
+      success: true,
+      message: 'Workout deleted successfully'
+    })
+  } catch (error) {
+    console.error('Delete workout error:', error)
+    return c.json({ error: 'Failed to delete workout' }, 500)
+  }
+})
+
+// ==================== NOTIFICATIONS ROUTES ====================
+
+// Get notification history
+apiRoutes.get('/notifications/history', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+
+    // Get all notifications for this tenant
+    const result = await c.env.DB.prepare(`
+      SELECT * FROM notifications_log WHERE tenant_id = ? ORDER BY created_at DESC LIMIT 100
+    `).bind(tenantId).all()
+
+    return c.json(result.results || [])
+  } catch (error) {
+    console.error('Get notifications error:', error)
+    return c.json({ error: 'Failed to fetch notifications' }, 500)
+  }
+})
+
+// Send notification
+apiRoutes.post('/notifications/send', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+    const { studentId, message, type } = await c.req.json()
+
+    if (!studentId || !message) {
+      return c.json({ error: 'Missing required fields' }, 400)
+    }
+
+    // Get student info
+    const student = await c.env.DB.prepare(`
+      SELECT name, whatsapp FROM students WHERE id = ? AND tenant_id = ?
+    `).bind(studentId, tenantId).first()
+
+    if (!student) {
+      return c.json({ error: 'Student not found' }, 404)
+    }
+
+    // Simulate WhatsApp API call (in production, use real WhatsApp Business API)
+    const notificationId = generateId()
+    const now = Math.floor(Date.now() / 1000)
+    
+    // Save notification log
+    await c.env.DB.prepare(`
+      INSERT INTO notifications_log (id, student_id, tenant_id, message_text, notification_type, status, created_at)
+      VALUES (?, ?, ?, ?, ?, 'delivered', ?)
+    `).bind(
+      notificationId,
+      studentId,
+      tenantId,
+      message,
+      type || 'manual',
+      now
+    ).run()
+
+    return c.json({
+      success: true,
+      notificationId,
+      message: 'Notification sent successfully',
+      recipient: {
+        name: student.name,
+        whatsapp: student.whatsapp
+      }
+    })
+  } catch (error) {
+    console.error('Send notification error:', error)
+    return c.json({ error: 'Failed to send notification' }, 500)
+  }
+})
