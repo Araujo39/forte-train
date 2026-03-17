@@ -1,4 +1,4 @@
--- Seed Data for ForteTrain SaaS Demo
+-- Seed Data for ForteTrain Demo
 
 -- Insert demo tenant (Personal Trainer)
 -- Password: demo123 (SHA-256 hash)

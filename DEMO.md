@@ -1,4 +1,4 @@
-# 🚀 ForteTrain SaaS - Guia Rápido de Demonstração
+# 🚀 ForteTrain - Guia Rápido de Demonstração
 
 ## 📱 Acesso Rápido
 

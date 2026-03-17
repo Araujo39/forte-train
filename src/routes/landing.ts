@@ -86,7 +86,7 @@ landingRoutes.get('/', (c) => {
                     <i class="fas fa-robot text-8xl" style="color: #CCFF00;"></i>
                 </div>
                 <h1 class="text-6xl md:text-8xl font-bold mb-6 glow-text" style="color: #CCFF00;">
-                    ForteTrain SaaS
+                    ForteTrain
                 </h1>
                 <p class="text-2xl md:text-3xl text-gray-300 mb-4">
                     Inteligência Artificial para Personal Trainers
@@ -301,7 +301,7 @@ landingRoutes.get('/', (c) => {
             <div class="max-w-7xl mx-auto text-center text-gray-400">
                 <div class="flex items-center justify-center mb-4">
                     <i class="fas fa-dumbbell text-2xl mr-2" style="color: #CCFF00;"></i>
-                    <span class="text-xl font-bold text-white">ForteTrain SaaS</span>
+                    <span class="text-xl font-bold text-white">ForteTrain</span>
                 </div>
                 <p class="mb-4">Inteligência Artificial para Personal Trainers</p>
                 <p class="text-sm">&copy; 2026 ForteTrain. Todos os direitos reservados.</p>

@@ -1,4 +1,4 @@
-# ForteTrain SaaS - Inteligência Artificial para Personal Trainers
+# ForteTrain - Inteligência Artificial para Personal Trainers
 
 ![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-SaaS-CCFF00?style=for-the-badge&logo=dumbbell)
 ![Status](https://img.shields.io/badge/Status-MVP-success?style=for-the-badge)
@@ -316,7 +316,7 @@ Este é um projeto proprietário desenvolvido para o Arnold Sports Festival 2026
 
 ## 📄 Licença
 
-Copyright © 2026 ForteTrain SaaS. Todos os direitos reservados.
+Copyright © 2026 ForteTrain. Todos os direitos reservados.
 
 ---
 
