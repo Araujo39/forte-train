@@ -773,7 +773,417 @@ Retorne APENAS um JSON válido seguindo exatamente esta estrutura:
   `)
 })
 
-// Other dashboard routes
+// ==================== STUDENTS MANAGEMENT ====================
 dashboardRoutes.get('/students', (c) => {
-  return c.html('<h1>Students Management - Coming soon</h1>')
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestão de Alunos - FitFlow</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+            body {
+                background: #0D0D0D;
+                color: #FFFFFF;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            }
+            .card-dark {
+                background: #1A1A1A;
+                border: 1px solid #333;
+            }
+            .sidebar {
+                background: #0D0D0D;
+                border-right: 1px solid #333;
+            }
+            .btn-neon {
+                background: #CCFF00;
+                color: #0D0D0D;
+                font-weight: bold;
+                transition: all 0.3s;
+            }
+            .btn-neon:hover {
+                transform: scale(1.02);
+                box-shadow: 0 0 20px rgba(204, 255, 0, 0.4);
+            }
+            .input-dark {
+                background: #0D0D0D;
+                border: 1px solid #333;
+                color: #FFFFFF;
+            }
+            .input-dark:focus {
+                outline: none;
+                border-color: #CCFF00;
+                box-shadow: 0 0 10px rgba(204, 255, 0, 0.2);
+            }
+            .student-card {
+                transition: all 0.3s;
+            }
+            .student-card:hover {
+                border-color: #CCFF00;
+                transform: translateY(-2px);
+            }
+            .badge-active {
+                background: #00FF88;
+                color: #0D0D0D;
+            }
+            .badge-inactive {
+                background: #FF3B30;
+                color: #FFFFFF;
+            }
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 50;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.8);
+                backdrop-filter: blur(5px);
+            }
+            .modal.active {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="flex min-h-screen">
+            <!-- Sidebar -->
+            <aside class="sidebar w-64 fixed h-full">
+                <div class="p-6">
+                    <div class="flex items-center mb-8">
+                        <i class="fas fa-dumbbell text-3xl" style="color: #CCFF00;"></i>
+                        <span class="ml-3 text-2xl font-bold" style="color: #CCFF00;">FitFlow</span>
+                    </div>
+
+                    <nav class="space-y-2">
+                        <a href="/dashboard" class="flex items-center px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                            <i class="fas fa-home mr-3"></i>Dashboard
+                        </a>
+                        <a href="/dashboard/students" class="flex items-center px-4 py-3 rounded-lg bg-gray-800 text-white">
+                            <i class="fas fa-users mr-3"></i>Alunos
+                        </a>
+                        <a href="/dashboard/workouts" class="flex items-center px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                            <i class="fas fa-dumbbell mr-3"></i>Treinos
+                        </a>
+                        <a href="/dashboard/ai-generator" class="flex items-center px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                            <i class="fas fa-brain mr-3"></i>Gerador IA
+                        </a>
+                        <a href="/dashboard/analytics" class="flex items-center px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                            <i class="fas fa-chart-line mr-3"></i>Analytics
+                        </a>
+                        <a href="/dashboard/notifications" class="flex items-center px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                            <i class="fas fa-bell mr-3"></i>Notificações
+                        </a>
+                        <a href="/dashboard/settings" class="flex items-center px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                            <i class="fas fa-cog mr-3"></i>Configurações
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 ml-64">
+                <!-- Top Bar -->
+                <header class="card-dark border-b border-gray-800 px-8 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold">
+                                <i class="fas fa-users mr-2" style="color: #CCFF00;"></i>
+                                Gestão de Alunos
+                            </h1>
+                            <p class="text-gray-400 text-sm">Gerencie todos os seus alunos em um só lugar</p>
+                        </div>
+                        <button onclick="openAddModal()" class="btn-neon px-6 py-2 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Novo Aluno
+                        </button>
+                    </div>
+                </header>
+
+                <div class="p-8">
+                    <!-- Filters -->
+                    <div class="card-dark p-6 rounded-xl mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <input 
+                                    type="text" 
+                                    id="searchInput" 
+                                    class="input-dark w-full px-4 py-2 rounded-lg"
+                                    placeholder="Buscar aluno..."
+                                    onkeyup="filterStudents()"
+                                />
+                            </div>
+                            <div>
+                                <select id="statusFilter" class="input-dark w-full px-4 py-2 rounded-lg" onchange="filterStudents()">
+                                    <option value="">Todos os status</option>
+                                    <option value="active">Ativos</option>
+                                    <option value="inactive">Inativos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <select id="goalFilter" class="input-dark w-full px-4 py-2 rounded-lg" onchange="filterStudents()">
+                                    <option value="">Todos os objetivos</option>
+                                    <option value="Hipertrofia">Hipertrofia</option>
+                                    <option value="Emagrecimento">Emagrecimento</option>
+                                    <option value="Condicionamento">Condicionamento</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button onclick="loadStudents()" class="bg-gray-700 hover:bg-gray-600 w-full px-4 py-2 rounded-lg transition">
+                                    <i class="fas fa-sync-alt mr-2"></i>Atualizar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Students Grid -->
+                    <div id="studentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="text-center py-12 col-span-full text-gray-400">
+                            Carregando alunos...
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Add Student Modal -->
+        <div id="addModal" class="modal">
+            <div class="card-dark p-8 rounded-2xl max-w-2xl w-full mx-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold">
+                        <i class="fas fa-user-plus mr-2" style="color: #CCFF00;"></i>
+                        Adicionar Novo Aluno
+                    </h2>
+                    <button onclick="closeAddModal()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <form id="addStudentForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-300">Nome Completo</label>
+                            <input type="text" id="fullName" class="input-dark w-full px-4 py-3 rounded-lg" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-300">WhatsApp</label>
+                            <input type="text" id="whatsapp" class="input-dark w-full px-4 py-3 rounded-lg" placeholder="+55 11 99999-9999" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-300">E-mail</label>
+                            <input type="email" id="email" class="input-dark w-full px-4 py-3 rounded-lg" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-300">Objetivo</label>
+                            <select id="goal" class="input-dark w-full px-4 py-3 rounded-lg">
+                                <option value="">Selecione...</option>
+                                <option value="Hipertrofia">Hipertrofia</option>
+                                <option value="Emagrecimento">Emagrecimento</option>
+                                <option value="Condicionamento">Condicionamento</option>
+                                <option value="Força">Força</option>
+                                <option value="Funcional">Funcional</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2 text-gray-300">Dados Físicos</label>
+                        <div class="grid grid-cols-3 gap-4">
+                            <input type="number" id="weight" class="input-dark w-full px-4 py-3 rounded-lg" placeholder="Peso (kg)" step="0.1" />
+                            <input type="number" id="height" class="input-dark w-full px-4 py-3 rounded-lg" placeholder="Altura (cm)" />
+                            <input type="number" id="bf" class="input-dark w-full px-4 py-3 rounded-lg" placeholder="BF %" step="0.1" />
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2 text-gray-300">Restrições/Observações</label>
+                        <textarea id="restrictions" class="input-dark w-full px-4 py-3 rounded-lg" rows="3" placeholder="Ex: Lesão de joelho, problema lombar..."></textarea>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit" class="btn-neon flex-1 py-3 rounded-lg">
+                            <i class="fas fa-check mr-2"></i>Salvar Aluno
+                        </button>
+                        <button type="button" onclick="closeAddModal()" class="bg-gray-700 hover:bg-gray-600 flex-1 py-3 rounded-lg transition">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>
+            const token = localStorage.getItem('fitflow_token');
+            if (!token) {
+                window.location.href = '/auth/login';
+            }
+
+            let allStudents = [];
+
+            async function loadStudents() {
+                try {
+                    const response = await axios.get('/api/students', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+
+                    allStudents = response.data.students;
+                    displayStudents(allStudents);
+                } catch (error) {
+                    console.error('Error loading students:', error);
+                }
+            }
+
+            function displayStudents(students) {
+                const grid = document.getElementById('studentsGrid');
+
+                if (students.length === 0) {
+                    grid.innerHTML = \`
+                        <div class="text-center py-12 col-span-full">
+                            <i class="fas fa-users text-6xl text-gray-700 mb-4"></i>
+                            <p class="text-gray-400">Nenhum aluno encontrado</p>
+                            <button onclick="openAddModal()" class="btn-neon px-6 py-3 rounded-lg mt-4">
+                                <i class="fas fa-plus mr-2"></i>Adicionar Primeiro Aluno
+                            </button>
+                        </div>
+                    \`;
+                    return;
+                }
+
+                grid.innerHTML = students.map(student => {
+                    const isActive = student.status === 'active';
+                    const physicalData = student.physical_data ? JSON.parse(student.physical_data) : {};
+                    const daysSinceLastWorkout = student.last_workout_date ? 
+                        Math.floor((Date.now() - student.last_workout_date * 1000) / (1000 * 60 * 60 * 24)) : null;
+
+                    return \`
+                        <div class="card-dark p-6 rounded-xl student-card">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center">
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-2xl mr-4">
+                                        \${student.full_name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg">\${student.full_name}</h3>
+                                        <p class="text-sm text-gray-400">\${student.goal || 'Sem objetivo definido'}</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold \${isActive ? 'badge-active' : 'badge-inactive'}">
+                                    \${isActive ? 'Ativo' : 'Inativo'}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 mb-4 text-sm">
+                                <div class="card-dark p-2 rounded text-center">
+                                    <div class="text-gray-400 text-xs">Peso</div>
+                                    <div class="font-bold">\${physicalData.weight || '-'}kg</div>
+                                </div>
+                                <div class="card-dark p-2 rounded text-center">
+                                    <div class="text-gray-400 text-xs">Altura</div>
+                                    <div class="font-bold">\${physicalData.height || '-'}cm</div>
+                                </div>
+                                <div class="card-dark p-2 rounded text-center">
+                                    <div class="text-gray-400 text-xs">BF</div>
+                                    <div class="font-bold">\${physicalData.bf || '-'}%</div>
+                                </div>
+                            </div>
+
+                            \${daysSinceLastWorkout !== null ? \`
+                                <div class="mb-4 text-sm \${daysSinceLastWorkout > 3 ? 'text-red-400' : 'text-green-400'}">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Último treino há \${daysSinceLastWorkout} dias
+                                </div>
+                            \` : ''}
+
+                            <div class="flex gap-2">
+                                <button onclick="createWorkout('\${student.id}')" class="btn-neon flex-1 py-2 rounded-lg text-sm">
+                                    <i class="fas fa-dumbbell mr-1"></i>Treino
+                                </button>
+                                <button onclick="viewDetails('\${student.id}')" class="bg-gray-700 hover:bg-gray-600 flex-1 py-2 rounded-lg text-sm transition">
+                                    <i class="fas fa-eye mr-1"></i>Ver Mais
+                                </button>
+                            </div>
+                        </div>
+                    \`;
+                }).join('');
+            }
+
+            function filterStudents() {
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const status = document.getElementById('statusFilter').value;
+                const goal = document.getElementById('goalFilter').value;
+
+                const filtered = allStudents.filter(student => {
+                    const matchSearch = student.full_name.toLowerCase().includes(search);
+                    const matchStatus = !status || student.status === status;
+                    const matchGoal = !goal || student.goal === goal;
+                    return matchSearch && matchStatus && matchGoal;
+                });
+
+                displayStudents(filtered);
+            }
+
+            function openAddModal() {
+                document.getElementById('addModal').classList.add('active');
+            }
+
+            function closeAddModal() {
+                document.getElementById('addModal').classList.remove('active');
+                document.getElementById('addStudentForm').reset();
+            }
+
+            document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const physical_data = {
+                    weight: document.getElementById('weight').value,
+                    height: document.getElementById('height').value,
+                    bf: document.getElementById('bf').value,
+                    restrictions: document.getElementById('restrictions').value
+                };
+
+                const data = {
+                    full_name: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    whatsapp: document.getElementById('whatsapp').value,
+                    goal: document.getElementById('goal').value,
+                    physical_data
+                };
+
+                try {
+                    await axios.post('/api/students', data, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+
+                    alert('Aluno cadastrado com sucesso!');
+                    closeAddModal();
+                    loadStudents();
+                } catch (error) {
+                    alert('Erro ao cadastrar aluno: ' + (error.response?.data?.error || 'Erro desconhecido'));
+                }
+            });
+
+            function createWorkout(studentId) {
+                localStorage.setItem('selected_student_id', studentId);
+                window.location.href = '/dashboard/ai-generator';
+            }
+
+            function viewDetails(studentId) {
+                alert('Detalhes do aluno em desenvolvimento!');
+            }
+
+            // Load students on page load
+            loadStudents();
+        </script>
+    </body>
+    </html>
+  `)
 })

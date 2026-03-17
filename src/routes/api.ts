@@ -410,3 +410,169 @@ apiRoutes.post('/notifications/motivational', async (c) => {
     return c.json({ error: 'Failed to send notification' }, 500)
   }
 })
+
+// ==================== AI VISION MODULE ====================
+
+apiRoutes.post('/ai/identify-equipment', async (c) => {
+  try {
+    const auth = c.req.header('Authorization')
+    if (!auth) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = auth.replace('Bearer ', '')
+    const payload = await verify(token, c.env.JWT_SECRET)
+    const tenantId = payload.tenantId
+
+    const { imageBase64 } = await c.req.json()
+
+    if (!imageBase64) {
+      return c.json({ error: 'Missing image data' }, 400)
+    }
+
+    // Generate image hash for caching
+    const encoder = new TextEncoder()
+    const data = encoder.encode(imageBase64)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const imageHash = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+
+    // Check cache first
+    const cached = await c.env.DB.prepare(
+      'SELECT equipment_name, muscle_groups, youtube_video_url FROM ai_equipment_cache WHERE image_hash = ?'
+    ).bind(imageHash).first()
+
+    if (cached) {
+      return c.json({
+        success: true,
+        cached: true,
+        equipment: {
+          name: cached.equipment_name,
+          muscleGroups: cached.muscle_groups,
+          videoUrl: cached.youtube_video_url
+        }
+      })
+    }
+
+    // Call OpenAI Vision API
+    const visionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${c.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `Você é um especialista em equipamentos de academia. Analise a imagem e retorne APENAS um objeto JSON com:
+{
+  "equipment_name": "Nome técnico do equipamento em português",
+  "muscle_groups": "Músculos trabalhados (separados por vírgula)",
+  "youtube_query": "Query de busca para YouTube no formato: Como usar [Nome] execução correta"
+}`
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Identifique este equipamento de academia e informe os músculos trabalhados.'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/jpeg;base64,${imageBase64}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 500
+      })
+    })
+
+    if (!visionResponse.ok) {
+      throw new Error('OpenAI Vision API failed')
+    }
+
+    const visionData = await visionResponse.json()
+    const aiResponse = visionData.choices[0].message.content
+    
+    // Parse AI response
+    const equipmentData = JSON.parse(aiResponse)
+
+    // Search YouTube for tutorial video
+    let videoUrl = null
+    if (c.env.YOUTUBE_API_KEY && c.env.YOUTUBE_API_KEY !== 'demo-youtube-key') {
+      try {
+        const youtubeResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?` +
+          `part=snippet&q=${encodeURIComponent(equipmentData.youtube_query + ' site:youtube.com Cariani OR Leandro Twin OR Refundini')}` +
+          `&type=video&maxResults=1&key=${c.env.YOUTUBE_API_KEY}`
+        )
+
+        if (youtubeResponse.ok) {
+          const youtubeData = await youtubeResponse.json()
+          if (youtubeData.items && youtubeData.items.length > 0) {
+            videoUrl = `https://www.youtube.com/watch?v=${youtubeData.items[0].id.videoId}`
+          }
+        }
+      } catch (error) {
+        console.error('YouTube API error:', error)
+      }
+    }
+
+    // Use fallback demo video if YouTube API not available
+    if (!videoUrl) {
+      videoUrl = `https://youtube.com/results?search_query=${encodeURIComponent(equipmentData.youtube_query)}`
+    }
+
+    // Cache the result
+    const cacheId = generateId()
+    const now = Math.floor(Date.now() / 1000)
+
+    await c.env.DB.prepare(`
+      INSERT INTO ai_equipment_cache (id, image_hash, equipment_name, muscle_groups, youtube_video_url, youtube_query, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      cacheId,
+      imageHash,
+      equipmentData.equipment_name,
+      equipmentData.muscle_groups,
+      videoUrl,
+      equipmentData.youtube_query,
+      now
+    ).run()
+
+    // Log AI usage
+    const tokenUsage = visionData.usage.total_tokens
+    await c.env.DB.prepare(`
+      INSERT INTO ai_logs (id, tenant_id, token_usage, purpose, model, prompt_tokens, completion_tokens, created_at)
+      VALUES (?, ?, ?, 'Vision - Identificação de Equipamento', 'gpt-4o', ?, ?, ?)
+    `).bind(
+      generateId(),
+      tenantId,
+      tokenUsage,
+      visionData.usage.prompt_tokens,
+      visionData.usage.completion_tokens,
+      now
+    ).run()
+
+    return c.json({
+      success: true,
+      cached: false,
+      equipment: {
+        name: equipmentData.equipment_name,
+        muscleGroups: equipmentData.muscle_groups,
+        videoUrl: videoUrl,
+        youtubeQuery: equipmentData.youtube_query
+      }
+    })
+  } catch (error) {
+    console.error('Vision API error:', error)
+    return c.json({ error: 'Failed to identify equipment' }, 500)
+  }
+})

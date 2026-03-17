@@ -22,12 +22,14 @@ import { landingRoutes } from './routes/landing'
 import { authRoutes } from './routes/auth'
 import { dashboardRoutes } from './routes/dashboard'
 import { apiRoutes } from './routes/api'
+import { studentRoutes } from './routes/student'
 
 // Mount routes
 app.route('/', landingRoutes)
 app.route('/auth', authRoutes)
 app.route('/dashboard', dashboardRoutes)
 app.route('/api', apiRoutes)
+app.route('/student', studentRoutes)
 
 // Default 404 handler
 app.notFound((c) => {
