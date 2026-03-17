@@ -2,7 +2,7 @@
 
 ![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-IA-CCFF00?style=for-the-badge&logo=dumbbell)
 ![Status](https://img.shields.io/badge/Status-MVP-success?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-4.0-blue?style=for-the-badge)
 
 ## 🚀 Visão Geral
 
@@ -15,6 +15,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 - **Dashboard Inteligente**: Alertas de inatividade, análise de evolução e previsão de churn
 - **Landing Page Integrada**: Página de vendas pronta para captar alunos
 - **Multi-Tenant Seguro**: Arquitetura multi-tenant com isolamento total de dados
+- **🆕 Super Admin Dashboard**: Visão macro do negócio com métricas financeiras (MRR/ARR), health score e impersonation
 
 ## 🌐 URLs do Projeto
 
@@ -22,6 +23,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 - **URL Principal**: https://fortetrain.pages.dev
 - **Dashboard**: https://fortetrain.pages.dev/dashboard
 - **Login**: https://fortetrain.pages.dev/auth/login
+- **🆕 Super Admin**: https://fortetrain.pages.dev/admin
 - **Status**: ✅ **ONLINE E FUNCIONANDO**
 
 ### 🔧 Ambiente de Desenvolvimento
@@ -34,16 +36,17 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | Rota | Descrição |
 |------|-----------|
 | `/` | Landing Page com tema Ultra Dark |
-| `/auth/login` | Login do Personal Trainer |
+| `/auth/login` | Login (Admin/Personal/Aluno) |
 | `/auth/register` | Cadastro de nova conta |
 | `/dashboard` | Dashboard principal do Personal |
 | `/dashboard/students` | Gestão completa de alunos |
-| `/dashboard/workouts` | **Treinos Salvos (Novo!)** |
+| `/dashboard/workouts` | **Treinos Salvos** |
 | `/dashboard/ai-generator` | **Gerador de Treinos IA** |
-| `/dashboard/analytics` | **Analytics com gráficos (Novo!)** |
-| `/dashboard/notifications` | **Sistema de Notificações WhatsApp (Novo!)** |
-| `/dashboard/settings` | **Configurações e API Keys (Novo!)** |
+| `/dashboard/analytics` | **Analytics com gráficos** |
+| `/dashboard/notifications` | **Sistema de Notificações WhatsApp** |
+| `/dashboard/settings` | **Configurações e API Keys** |
 | `/student/app` | **WebApp do Aluno (Player de Treino + Vision)** |
+| **🆕 `/admin`** | **Super Admin Dashboard (Business View)** |
 | `/api/auth/login` | API de autenticação |
 | `/api/dashboard/stats` | Estatísticas do dashboard |
 | `/api/students` | Gestão de alunos (CRUD) |
@@ -52,15 +55,97 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/api/ai/identify-equipment` | **Módulo Vision - Identificação de equipamentos** |
 | `/api/notifications/history` | Histórico de notificações enviadas |
 | `/api/notifications/send` | Enviar notificação WhatsApp |
+| **🆕 `/api/admin/platform-stats`** | **KPIs financeiros (MRR/ARR/Churn)** |
+| **🆕 `/api/admin/tenants`** | **Lista de Personal Trainers** |
+| **🆕 `/api/admin/health-scores`** | **Health Score Analysis** |
+| **🆕 `/api/admin/ai-errors`** | **Monitoramento de erros IA** |
+| **🆕 `/api/admin/plans`** | **Gestão de planos e pricing** |
+| **🆕 `/api/admin/impersonate`** | **Sistema de impersonation** |
+
+## 🔐 Sistema RBAC (Role-Based Access Control)
+
+### 👥 Perfis de Usuário
+
+O ForteTrain implementa 3 níveis de acesso:
+
+#### 1️⃣ **Super Admin** (Dono da Plataforma)
+- **Email**: admin@fortetrain.app
+- **Senha**: admin123
+- **Dashboard**: https://fortetrain.pages.dev/admin
+- **Permissões**:
+  - ✅ Visualizar todos os Personal Trainers e seus alunos
+  - ✅ Métricas financeiras (MRR, ARR, Churn Rate)
+  - ✅ Health Score Analysis (identificar contas em risco)
+  - ✅ AI Error Monitoring (logs de erros OpenAI/YouTube)
+  - ✅ Gestão de planos e pricing
+  - ✅ Impersonation (acessar dashboard de qualquer Personal para suporte)
+  - ✅ Refresh automático de métricas
+  - ✅ Análise de engajamento (AI workouts, Vision requests)
+
+#### 2️⃣ **Personal Trainer** (B2B Customer)
+- **Email**: andre@fortetrain.app
+- **Senha**: demo123
+- **Dashboard**: https://fortetrain.pages.dev/dashboard
+- **Permissões**:
+  - ✅ Gerenciar seus próprios alunos (CRUD)
+  - ✅ Criar treinos com IA (GPT-4o-mini)
+  - ✅ Módulo Vision (identificar equipamentos)
+  - ✅ Enviar notificações WhatsApp
+  - ✅ Visualizar analytics do seu negócio
+  - ✅ Configurar API keys e branding
+  - ❌ Não pode ver outros Personal Trainers
+
+#### 3️⃣ **Aluno** (End User)
+- **Email**: joao.santos@email.com / maria.oliveira@email.com / carlos.mendes@email.com
+- **Senha**: aluno123
+- **WebApp**: https://fortetrain.pages.dev/student/app
+- **Permissões**:
+  - ✅ Visualizar seus treinos
+  - ✅ Módulo Vision (identificar equipamentos por foto)
+  - ✅ Ver analytics pessoais
+  - ✅ Registrar cargas de treino
+  - ❌ Não pode criar treinos
+  - ❌ Não pode ver outros alunos
+
+### 🔑 Credenciais de Teste (Produção)
+
+```bash
+# Super Admin
+Email: admin@fortetrain.app
+Senha: admin123
+URL: https://fortetrain.pages.dev/admin
+
+# Personal Trainer (Demo)
+Email: andre@fortetrain.app
+Senha: demo123
+URL: https://fortetrain.pages.dev/dashboard
+
+# Alunos (Demo)
+Email: joao.santos@email.com | maria.oliveira@email.com | carlos.mendes@email.com
+Senha: aluno123
+URL: https://fortetrain.pages.dev/student/app
+```
+
+---
 
 ## ✨ Funcionalidades Implementadas
 
 ### ✅ Completas (100%)
 - [x] **Landing Page ultra dark** (#0D0D0D) com acentos neon (#CCFF00)
 - [x] **Sistema de autenticação** completo (registro e login com JWT)
+- [x] **RBAC (3 perfis)**: Super Admin, Personal Trainer, Aluno
 - [x] **Dashboard do Personal Trainer** com estatísticas em tempo real
+- [x] **🆕 Super Admin Dashboard** (Business View):
+  - [x] **KPIs Financeiros**: MRR, ARR, Churn Rate, Active Tenants
+  - [x] **Tenant Management**: Lista de Personal Trainers com busca e filtros
+  - [x] **Health Score Analysis**: Identificar contas em risco (inactive/at-risk/healthy)
+  - [x] **AI Error Monitoring**: Logs de erros OpenAI, YouTube, Vision
+  - [x] **Pricing & Plans**: Visualização de planos (Start/Pro/Enterprise)
+  - [x] **Impersonation System**: Admin pode acessar dashboard de qualquer Personal
+  - [x] **Engagement Metrics**: Total students, AI workouts, Vision requests
 - [x] **Banco de dados D1 multi-tenant** com isolamento de dados
 - [x] **Gestão de alunos** completa com filtros, busca e cadastro
+- [x] **Modal de detalhes do aluno** com 4 abas (dados pessoais, treinos, pagamentos, evolução)
 - [x] **Alertas de inatividade** inteligentes (3+ dias sem treinar)
 - [x] **APIs REST completas** para todas as funcionalidades
 - [x] **Gerador de Treinos com IA** (interface completa com GPT-4o-mini)
@@ -89,14 +174,35 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 ### Modelo Multi-Tenant com Isolamento Lógico
 
 ```
+admin_users (Super Admins)
+├── impersonation_logs (Auditoria de acesso)
+└── platform_stats (Métricas agregadas)
+
 tenants (Personal Trainers)
+├── subscriptions (Assinaturas e billing)
+├── payments (Histórico de transações)
+├── tenant_metrics (Health Score e engajamento)
 ├── students (Alunos)
 │   ├── workouts (Treinos)
 │   ├── workout_sessions (Sessões de treino)
 │   └── notifications_log (Notificações)
 ├── ai_logs (Controle de custos de IA)
-└── ai_equipment_cache (Cache de equipamentos identificados)
+├── ai_equipment_cache (Cache de equipamentos identificados)
+└── ai_error_logs (Monitoramento de erros)
+
+plan_limits (Configuração de planos)
+├── start: R$ 99.90/mês (30 alunos, 100 AI requests)
+├── pro: R$ 199.90/mês (100 alunos, 500 AI requests)
+└── enterprise: R$ 499.90/mês (ilimitado)
 ```
+
+### 📊 Estatísticas (Produção)
+- **16 tabelas** D1 (SQLite na edge)
+- **5 Personal Trainers** demo
+- **74 alunos** total
+- **127 registros** de seed data
+- **MRR**: R$ 999.60
+- **ARR**: R$ 11,995.20
 
 ### 📊 Principais Tabelas
 
