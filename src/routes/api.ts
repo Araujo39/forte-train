@@ -1063,3 +1063,435 @@ apiRoutes.get('/admin/tenants/:id', async (c) => {
     return c.json({ error: 'Failed to fetch tenant details' }, 500)
   }
 })
+
+// ==================== SUPER ADMIN APIS ====================
+
+// GET /api/admin/platform-stats - Platform KPIs
+apiRoutes.get('/admin/platform-stats', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    // Get latest platform stats
+    const stats = await c.env.DB.prepare(`
+      SELECT * FROM platform_stats ORDER BY stat_date DESC LIMIT 1
+    `).first()
+
+    // If no stats exist, calculate them
+    if (!stats) {
+      const now = Math.floor(Date.now() / 1000)
+      const today = Math.floor(now / 86400) * 86400 // Start of day
+
+      // Count tenants by status
+      const tenantStats = await c.env.DB.prepare(`
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN s.status = 'active' THEN 1 ELSE 0 END) as active,
+          SUM(CASE WHEN s.status = 'trial' THEN 1 ELSE 0 END) as trial,
+          SUM(CASE WHEN s.status = 'delinquent' THEN 1 ELSE 0 END) as delinquent,
+          SUM(CASE WHEN s.status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
+        FROM tenants t
+        LEFT JOIN subscriptions s ON t.id = s.tenant_id
+      `).first()
+
+      // Calculate MRR/ARR from active subscriptions
+      const revenueStats = await c.env.DB.prepare(`
+        SELECT 
+          SUM(CASE WHEN status = 'active' THEN mrr ELSE 0 END) as total_mrr
+        FROM subscriptions
+      `).first()
+
+      const mrr = revenueStats?.total_mrr || 0
+      const arr = mrr * 12
+
+      // Count students and workouts
+      const engagementStats = await c.env.DB.prepare(`
+        SELECT 
+          (SELECT COUNT(*) FROM students) as total_students,
+          (SELECT COUNT(*) FROM workouts) as total_workouts,
+          (SELECT COUNT(*) FROM ai_logs WHERE purpose = 'Geração de Treino') as ai_requests,
+          (SELECT COUNT(*) FROM ai_logs WHERE purpose = 'Vision - Identificação de Equipamento') as vision_requests
+      `).first()
+
+      // Count recent churns (cancelled in last 30 days)
+      const churnStats = await c.env.DB.prepare(`
+        SELECT COUNT(*) as churn_count
+        FROM subscriptions
+        WHERE status = 'cancelled' AND cancelled_at > ?
+      `).bind(now - 2592000).first() // 30 days ago
+
+      return c.json({
+        stats: {
+          total_tenants: tenantStats?.total || 0,
+          active_tenants: tenantStats?.active || 0,
+          trial_tenants: tenantStats?.trial || 0,
+          delinquent_tenants: tenantStats?.delinquent || 0,
+          cancelled_tenants: tenantStats?.cancelled || 0,
+          total_students: engagementStats?.total_students || 0,
+          total_workouts: engagementStats?.total_workouts || 0,
+          ai_requests_count: engagementStats?.ai_requests || 0,
+          vision_requests_count: engagementStats?.vision_requests || 0,
+          mrr: parseFloat(mrr as any) || 0,
+          arr: parseFloat(arr as any) || 0,
+          churn_count: churnStats?.churn_count || 0
+        }
+      })
+    }
+
+    return c.json({ stats })
+  } catch (error) {
+    console.error('Platform stats error:', error)
+    return c.json({ error: 'Failed to fetch platform stats' }, 500)
+  }
+})
+
+// GET /api/admin/tenants - List all Personal Trainers with metrics
+apiRoutes.get('/admin/tenants', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    // Get all tenants with their subscription and metrics
+    const tenants = await c.env.DB.prepare(`
+      SELECT 
+        t.id,
+        t.name,
+        t.email,
+        t.subdomain,
+        t.plan_type,
+        t.created_at,
+        s.status as subscription_status,
+        s.mrr,
+        m.total_students as student_count,
+        m.last_activity_date,
+        m.health_score,
+        m.health_status
+      FROM tenants t
+      LEFT JOIN subscriptions s ON t.id = s.tenant_id
+      LEFT JOIN tenant_metrics m ON t.id = m.tenant_id
+      WHERE t.role = 'personal'
+      ORDER BY t.created_at DESC
+    `).all()
+
+    return c.json({ tenants: tenants.results || [] })
+  } catch (error) {
+    console.error('List tenants error:', error)
+    return c.json({ error: 'Failed to fetch tenants' }, 500)
+  }
+})
+
+// GET /api/admin/health-scores - Health Score Analysis
+apiRoutes.get('/admin/health-scores', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    // Get tenant metrics sorted by health score (lowest first = at-risk)
+    const metrics = await c.env.DB.prepare(`
+      SELECT 
+        m.*,
+        t.name as tenant_name,
+        t.email as tenant_email
+      FROM tenant_metrics m
+      JOIN tenants t ON m.tenant_id = t.id
+      ORDER BY m.health_score ASC
+    `).all()
+
+    return c.json({ metrics: metrics.results || [] })
+  } catch (error) {
+    console.error('Health scores error:', error)
+    return c.json({ error: 'Failed to fetch health scores' }, 500)
+  }
+})
+
+// GET /api/admin/ai-errors - AI Error Logs
+apiRoutes.get('/admin/ai-errors', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    // Get unresolved errors first
+    const errors = await c.env.DB.prepare(`
+      SELECT 
+        e.*,
+        t.email as tenant_email,
+        t.name as tenant_name
+      FROM ai_error_logs e
+      LEFT JOIN tenants t ON e.tenant_id = t.id
+      ORDER BY e.resolved ASC, e.created_at DESC
+      LIMIT 50
+    `).all()
+
+    return c.json({ errors: errors.results || [] })
+  } catch (error) {
+    console.error('AI errors error:', error)
+    return c.json({ error: 'Failed to fetch AI errors' }, 500)
+  }
+})
+
+// POST /api/admin/ai-errors/:id/resolve - Mark error as resolved
+apiRoutes.post('/admin/ai-errors/:id/resolve', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    const errorId = c.req.param('id')
+
+    await c.env.DB.prepare(`
+      UPDATE ai_error_logs SET resolved = 1 WHERE id = ?
+    `).bind(errorId).run()
+
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Resolve error error:', error)
+    return c.json({ error: 'Failed to resolve error' }, 500)
+  }
+})
+
+// GET /api/admin/plans - List all pricing plans
+apiRoutes.get('/admin/plans', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    const plans = await c.env.DB.prepare(`
+      SELECT * FROM plan_limits WHERE is_active = 1 ORDER BY price_monthly ASC
+    `).all()
+
+    return c.json({ plans: plans.results || [] })
+  } catch (error) {
+    console.error('Get plans error:', error)
+    return c.json({ error: 'Failed to fetch plans' }, 500)
+  }
+})
+
+// POST /api/admin/impersonate - Start impersonation session
+apiRoutes.post('/admin/impersonate', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    const { tenant_id } = await c.req.json()
+
+    // Get target tenant
+    const tenant = await c.env.DB.prepare(`
+      SELECT id, name, email, plan_type FROM tenants WHERE id = ?
+    `).bind(tenant_id).first()
+
+    if (!tenant) {
+      return c.json({ error: 'Tenant not found' }, 404)
+    }
+
+    // Log impersonation
+    const logId = generateId()
+    const now = Math.floor(Date.now() / 1000)
+    
+    await c.env.DB.prepare(`
+      INSERT INTO impersonation_logs 
+      (id, admin_id, admin_email, target_tenant_id, target_tenant_email, start_time, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      logId,
+      payload.userId,
+      payload.email,
+      tenant.id,
+      tenant.email,
+      now,
+      now
+    ).run()
+
+    // Generate impersonation token
+    const impersonationToken = await sign({
+      tenantId: tenant.id,
+      userId: tenant.id,
+      email: tenant.email,
+      role: 'personal',
+      impersonated_by: payload.userId,
+      impersonation_log_id: logId
+    }, c.env.JWT_SECRET)
+
+    return c.json({
+      success: true,
+      impersonation_token: impersonationToken,
+      tenant: {
+        id: tenant.id,
+        name: tenant.name,
+        email: tenant.email
+      },
+      log_id: logId
+    })
+  } catch (error) {
+    console.error('Impersonation error:', error)
+    return c.json({ error: 'Failed to start impersonation' }, 500)
+  }
+})
+
+// POST /api/admin/refresh-metrics - Recalculate platform metrics
+apiRoutes.post('/admin/refresh-metrics', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+    const today = Math.floor(now / 86400) * 86400
+
+    // Delete old stats for today
+    await c.env.DB.prepare(`DELETE FROM platform_stats WHERE stat_date = ?`).bind(today).run()
+
+    // Recalculate tenant metrics
+    const tenants = await c.env.DB.prepare(`SELECT id FROM tenants WHERE role = 'personal'`).all()
+
+    for (const tenant of (tenants.results || [])) {
+      const tenantId = (tenant as any).id
+
+      // Count students
+      const studentCount = await c.env.DB.prepare(`
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN last_workout_date > ? THEN 1 ELSE 0 END) as active
+        FROM students WHERE tenant_id = ?
+      `).bind(now - 604800, tenantId).first() // 7 days ago
+
+      // Count workouts and AI usage
+      const workoutCount = await c.env.DB.prepare(`
+        SELECT COUNT(*) as total FROM workouts WHERE tenant_id = ?
+      `).bind(tenantId).first()
+
+      const aiUsage = await c.env.DB.prepare(`
+        SELECT 
+          COUNT(*) as total,
+          MAX(created_at) as last_usage
+        FROM ai_logs WHERE tenant_id = ? AND purpose = 'Geração de Treino'
+      `).bind(tenantId).first()
+
+      const visionUsage = await c.env.DB.prepare(`
+        SELECT 
+          COUNT(*) as total,
+          MAX(created_at) as last_usage
+        FROM ai_logs WHERE tenant_id = ? AND purpose = 'Vision - Identificação de Equipamento'
+      `).bind(tenantId).first()
+
+      const lastActivity = await c.env.DB.prepare(`
+        SELECT MAX(created_at) as last_date FROM workouts WHERE tenant_id = ?
+      `).bind(tenantId).first()
+
+      // Calculate health score (0-100)
+      const totalStudents = (studentCount as any)?.total || 0
+      const activeStudents = (studentCount as any)?.active || 0
+      const totalWorkouts = (workoutCount as any)?.total || 0
+      const aiCount = (aiUsage as any)?.total || 0
+      const visionCount = (visionUsage as any)?.total || 0
+      const daysSinceActivity = lastActivity ? Math.floor((now - (lastActivity as any).last_date) / 86400) : 999
+
+      let healthScore = 0
+      if (totalStudents > 0) healthScore += 20
+      if (activeStudents > 0) healthScore += 30
+      if (totalWorkouts > 5) healthScore += 20
+      if (aiCount > 0) healthScore += 15
+      if (visionCount > 0) healthScore += 10
+      if (daysSinceActivity < 7) healthScore += 5
+
+      const healthStatus = healthScore >= 70 ? 'healthy' : healthScore >= 40 ? 'at_risk' : 'inactive'
+
+      // Upsert tenant metrics
+      await c.env.DB.prepare(`
+        INSERT OR REPLACE INTO tenant_metrics 
+        (id, tenant_id, total_students, active_students, total_workouts_created, 
+         ai_workouts_generated, vision_requests, last_activity_date, 
+         last_ai_usage, last_vision_usage, health_score, health_status, calculated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        `metric-${tenantId}`,
+        tenantId,
+        totalStudents,
+        activeStudents,
+        totalWorkouts,
+        aiCount,
+        visionCount,
+        (lastActivity as any)?.last_date || null,
+        (aiUsage as any)?.last_usage || null,
+        (visionUsage as any)?.last_usage || null,
+        healthScore,
+        healthStatus,
+        now
+      ).run()
+    }
+
+    return c.json({ success: true, message: 'Metrics refreshed successfully' })
+  } catch (error) {
+    console.error('Refresh metrics error:', error)
+    return c.json({ error: 'Failed to refresh metrics' }, 500)
+  }
+})
