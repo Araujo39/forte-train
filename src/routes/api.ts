@@ -792,7 +792,7 @@ apiRoutes.post('/notifications/send', async (c) => {
 
     // Get student info
     const student = await c.env.DB.prepare(`
-      SELECT name, whatsapp FROM students WHERE id = ? AND tenant_id = ?
+      SELECT full_name as name, whatsapp FROM students WHERE id = ? AND tenant_id = ?
     `).bind(studentId, tenantId).first()
 
     if (!student) {

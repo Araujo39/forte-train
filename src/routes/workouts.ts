@@ -200,7 +200,7 @@ workoutsRoute.get('/', (c) => {
                     students.forEach(student => {
                         const option = document.createElement('option');
                         option.value = student.id;
-                        option.textContent = student.name;
+                        option.textContent = student.full_name;
                         filterSelect.appendChild(option);
                     });
 
@@ -256,7 +256,7 @@ workoutsRoute.get('/', (c) => {
 
                 grid.innerHTML = filtered.map(workout => {
                     const student = students.find(s => s.id === workout.student_id);
-                    const studentName = student ? student.name : 'Aluno não encontrado';
+                    const studentName = student ? student.full_name : 'Aluno não encontrado';
                     const exercises = JSON.parse(workout.exercises || '[]');
                     const createdAt = new Date(workout.created_at).toLocaleDateString('pt-BR');
                     
@@ -313,7 +313,7 @@ workoutsRoute.get('/', (c) => {
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <span class="text-gray-400">Aluno:</span>
-                                <span class="font-bold ml-2">\${student ? student.name : 'N/A'}</span>
+                                <span class="font-bold ml-2">\${student ? student.full_name : 'N/A'}</span>
                             </div>
                             <div>
                                 <span class="text-gray-400">Status:</span>

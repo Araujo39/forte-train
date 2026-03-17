@@ -408,7 +408,7 @@ notificationsRoute.get('/', (c) => {
                                             <i class="fas fa-user text-lime-400"></i>
                                         </div>
                                         <div>
-                                            <div class="font-bold">\${student ? student.name : 'Aluno não encontrado'}</div>
+                                            <div class="font-bold">\${student ? student.full_name : 'Aluno não encontrado'}</div>
                                             <div class="text-sm text-gray-400">\${student ? student.whatsapp : ''}</div>
                                         </div>
                                     </div>
@@ -532,7 +532,7 @@ notificationsRoute.get('/', (c) => {
 
                     // Send notifications (simulated)
                     for (const student of targetStudents) {
-                        const personalizedMessage = messageText.replace('{nome}', student.name);
+                        const personalizedMessage = messageText.replace('{nome}', student.full_name);
                         
                         await axios.post('/api/notifications/send', {
                             studentId: student.id,
