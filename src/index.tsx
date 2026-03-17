@@ -27,10 +27,12 @@ import { analyticsRoute } from './routes/analytics'
 import { settingsRoute } from './routes/settings'
 import { workoutsRoute } from './routes/workouts'
 import { notificationsRoute } from './routes/notifications'
+import { adminRoutes } from './routes/admin'
 
 // Mount routes
 app.route('/', landingRoutes)
 app.route('/auth', authRoutes)
+app.route('/admin', adminRoutes)
 app.route('/dashboard', dashboardRoutes)
 app.route('/dashboard/analytics', analyticsRoute)
 app.route('/dashboard/settings', settingsRoute)

@@ -64,33 +64,97 @@ apiRoutes.post('/auth/login', async (c) => {
       return c.json({ error: 'Missing email or password' }, 400)
     }
 
-    // Find tenant
-    const tenant = await c.env.DB.prepare(
-      'SELECT id, name, email, password_hash, plan_type FROM tenants WHERE email = ?'
+    // Hash the password for comparison
+    const passwordHash = await hashPassword(password)
+
+    // 1. Try ADMIN login first
+    const admin = await c.env.DB.prepare(
+      'SELECT id, name, email, password_hash, role FROM admin_users WHERE email = ?'
     ).bind(email).first()
 
-    if (!tenant) {
-      return c.json({ error: 'Invalid credentials' }, 401)
-    }
+    if (admin) {
+      const validPassword = await verifyPassword(password, admin.password_hash as string)
+      if (validPassword) {
+        const token = await sign({ 
+          userId: admin.id, 
+          email,
+          role: 'admin'
+        }, c.env.JWT_SECRET)
 
-    // Verify password
-    const validPassword = await verifyPassword(password, tenant.password_hash as string)
-    if (!validPassword) {
-      return c.json({ error: 'Invalid credentials' }, 401)
-    }
-
-    // Generate JWT
-    const token = await sign({ tenantId: tenant.id, email }, c.env.JWT_SECRET)
-
-    return c.json({
-      token,
-      user: {
-        id: tenant.id,
-        name: tenant.name,
-        email: tenant.email,
-        plan: tenant.plan_type
+        return c.json({
+          token,
+          user: {
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            role: 'admin',
+            type: 'admin'
+          }
+        })
       }
-    })
+    }
+
+    // 2. Try PERSONAL TRAINER login
+    const tenant = await c.env.DB.prepare(
+      'SELECT id, name, email, password_hash, plan_type, role FROM tenants WHERE email = ?'
+    ).bind(email).first()
+
+    if (tenant) {
+      const validPassword = await verifyPassword(password, tenant.password_hash as string)
+      if (validPassword) {
+        const token = await sign({ 
+          tenantId: tenant.id,
+          userId: tenant.id, 
+          email,
+          role: tenant.role || 'personal'
+        }, c.env.JWT_SECRET)
+
+        return c.json({
+          token,
+          user: {
+            id: tenant.id,
+            name: tenant.name,
+            email: tenant.email,
+            plan: tenant.plan_type,
+            role: tenant.role || 'personal',
+            type: 'personal'
+          }
+        })
+      }
+    }
+
+    // 3. Try STUDENT login
+    const student = await c.env.DB.prepare(
+      'SELECT id, full_name, email, password_hash, tenant_id FROM students WHERE email = ?'
+    ).bind(email).first()
+
+    if (student && student.password_hash) {
+      const validPassword = await verifyPassword(password, student.password_hash as string)
+      if (validPassword) {
+        const token = await sign({ 
+          studentId: student.id,
+          userId: student.id,
+          tenantId: student.tenant_id,
+          email,
+          role: 'student'
+        }, c.env.JWT_SECRET)
+
+        return c.json({
+          token,
+          user: {
+            id: student.id,
+            name: student.full_name,
+            email: student.email,
+            tenantId: student.tenant_id,
+            role: 'student',
+            type: 'student'
+          }
+        })
+      }
+    }
+
+    // No match found
+    return c.json({ error: 'Invalid credentials' }, 401)
   } catch (error) {
     console.error('Login error:', error)
     return c.json({ error: 'Login failed' }, 500)
@@ -866,5 +930,136 @@ apiRoutes.delete('/students/:id', async (c) => {
   } catch (error) {
     console.error('Delete student error:', error)
     return c.json({ error: 'Failed to delete student' }, 500)
+  }
+})
+
+// ==================== ADMIN ROUTES ====================
+
+// Get all tenants (ADMIN only)
+apiRoutes.get('/admin/tenants', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    // Check if user is admin
+    if (!payload || payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    // Get all tenants with student count
+    const tenants = await c.env.DB.prepare(`
+      SELECT 
+        t.id,
+        t.name,
+        t.email,
+        t.subdomain,
+        t.plan_type,
+        t.plan_status,
+        t.created_at,
+        COUNT(s.id) as student_count
+      FROM tenants t
+      LEFT JOIN students s ON s.tenant_id = t.id
+      GROUP BY t.id
+      ORDER BY t.created_at DESC
+    `).all()
+
+    return c.json({
+      tenants: tenants.results || [],
+      total: tenants.results?.length || 0
+    })
+  } catch (error) {
+    console.error('Get tenants error:', error)
+    return c.json({ error: 'Failed to fetch tenants' }, 500)
+  }
+})
+
+// Get all students across all tenants (ADMIN only)
+apiRoutes.get('/admin/students', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    // Check if user is admin
+    if (!payload || payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    // Get all students with tenant info
+    const students = await c.env.DB.prepare(`
+      SELECT 
+        s.id,
+        s.full_name,
+        s.email,
+        s.whatsapp,
+        s.goal,
+        s.status,
+        s.created_at,
+        s.last_workout_date,
+        t.name as tenant_name,
+        t.email as tenant_email
+      FROM students s
+      LEFT JOIN tenants t ON t.id = s.tenant_id
+      ORDER BY s.created_at DESC
+    `).all()
+
+    return c.json({
+      students: students.results || [],
+      total: students.results?.length || 0
+    })
+  } catch (error) {
+    console.error('Get all students error:', error)
+    return c.json({ error: 'Failed to fetch students' }, 500)
+  }
+})
+
+// Get tenant details with students (ADMIN only)
+apiRoutes.get('/admin/tenants/:id', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    // Check if user is admin
+    if (!payload || payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    const tenantId = c.req.param('id')
+
+    // Get tenant details
+    const tenant = await c.env.DB.prepare(`
+      SELECT * FROM tenants WHERE id = ?
+    `).bind(tenantId).first()
+
+    if (!tenant) {
+      return c.json({ error: 'Tenant not found' }, 404)
+    }
+
+    // Get tenant's students
+    const students = await c.env.DB.prepare(`
+      SELECT * FROM students WHERE tenant_id = ? ORDER BY created_at DESC
+    `).bind(tenantId).all()
+
+    return c.json({
+      tenant,
+      students: students.results || []
+    })
+  } catch (error) {
+    console.error('Get tenant details error:', error)
+    return c.json({ error: 'Failed to fetch tenant details' }, 500)
   }
 })
