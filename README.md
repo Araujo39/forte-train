@@ -1,12 +1,12 @@
 # ForteTrain - Inteligência Artificial para Personal Trainers
 
-![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-SaaS-CCFF00?style=for-the-badge&logo=dumbbell)
+![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-IA-CCFF00?style=for-the-badge&logo=dumbbell)
 ![Status](https://img.shields.io/badge/Status-MVP-success?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-1.0-blue?style=for-the-badge)
 
 ## 🚀 Visão Geral
 
-O **ForteTrain** é um ecossistema digital SaaS B2B2C que permite a Personal Trainers gerirem múltiplos alunos, prescreverem treinos otimizados por IA e automatizarem a retenção via notificações inteligentes.
+O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers gerirem múltiplos alunos, prescreverem treinos otimizados por IA e automatizarem a retenção via notificações inteligentes.
 
 ### 🎯 Diferenciais
 
@@ -14,7 +14,7 @@ O **ForteTrain** é um ecossistema digital SaaS B2B2C que permite a Personal Tra
 - **Módulo Vision**: Aluno fotografa equipamento e IA identifica + sugere vídeos tutoriais
 - **Dashboard Inteligente**: Alertas de inatividade, análise de evolução e previsão de churn
 - **Landing Page Integrada**: Página de vendas pronta para captar alunos
-- **Multi-Tenant Seguro**: Arquitetura SaaS com isolamento total de dados
+- **Multi-Tenant Seguro**: Arquitetura multi-tenant com isolamento total de dados
 
 ## 🌐 URLs do Projeto
 

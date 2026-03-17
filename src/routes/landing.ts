@@ -181,7 +181,7 @@ landingRoutes.get('/', (c) => {
                         <i class="fas fa-shield-alt text-5xl mb-4" style="color: #CCFF00;"></i>
                         <h3 class="text-2xl font-bold mb-3">Multi-Tenant Seguro</h3>
                         <p class="text-gray-400">
-                            Arquitetura SaaS B2B2C com isolamento total de dados. Seus alunos protegidos.
+                            Arquitetura B2B2C com isolamento total de dados. Seus alunos protegidos.
                         </p>
                     </div>
                 </div>

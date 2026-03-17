@@ -67,7 +67,7 @@
 5. "Personal training com poder de IA"
 
 ### Elevator Pitch (30s)
-*"ForteTrain é a plataforma SaaS que transforma Personal Trainers em empresas de alta performance. Com Inteligência Artificial, você cria treinos personalizados em 30 segundos, identifica equipamentos por foto e mantém alunos motivados com alertas automáticos. Tudo em uma interface ultra dark e profissional."*
+*"ForteTrain é a plataforma que transforma Personal Trainers em empresas de alta performance. Com Inteligência Artificial, você cria treinos personalizados em 30 segundos, identifica equipamentos por foto e mantém alunos motivados com alertas automáticos. Tudo em uma interface ultra dark e profissional."*
 
 ### Pitch Completo (2 min)
 *"Personal Trainers brasileiros gastam 70% do tempo com tarefas administrativas: montando planilhas, respondendo WhatsApp e tentando evitar desistências. O ForteTrain resolve isso.*
