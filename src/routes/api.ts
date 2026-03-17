@@ -830,3 +830,41 @@ apiRoutes.post('/notifications/send', async (c) => {
     return c.json({ error: 'Failed to send notification' }, 500)
   }
 })
+
+// Delete student
+apiRoutes.delete('/students/:id', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (!payload || !payload.tenantId) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+
+    // Delete student (cascade will handle related records if configured)
+    await c.env.DB.prepare(`
+      DELETE FROM students WHERE id = ? AND tenant_id = ?
+    `).bind(studentId, tenantId).run()
+
+    // Also delete related workouts
+    await c.env.DB.prepare(`
+      DELETE FROM workouts WHERE student_id = ? AND tenant_id = ?
+    `).bind(studentId, tenantId).run()
+
+    return c.json({
+      success: true,
+      message: 'Student deleted successfully'
+    })
+  } catch (error) {
+    console.error('Delete student error:', error)
+    return c.json({ error: 'Failed to delete student' }, 500)
+  }
+})
