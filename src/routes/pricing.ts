@@ -308,8 +308,12 @@ pricingRoutes.get('/', (c) => {
         <script>
             const token = localStorage.getItem('fortetrain_token');
             if (!token) {
-                window.location.href = '/auth/login';
+                alert('Você precisa fazer login primeiro!');
+                window.location.href = '/auth/login?redirect=/pricing';
+                throw new Error('No token');
             }
+
+            console.log('Token found:', token ? 'YES' : 'NO');
 
             let billingCycle = 'monthly';
 
@@ -341,6 +345,9 @@ pricingRoutes.get('/', (c) => {
 
             async function selectPlan(planType) {
                 try {
+                    console.log('Selecting plan:', planType, 'billing:', billingCycle);
+                    console.log('Token:', token ? token.substring(0, 20) + '...' : 'MISSING');
+                    
                     // Create preference
                     const response = await axios.post('/api/payments/create-preference', {
                         plan_type: planType,
@@ -349,6 +356,8 @@ pricingRoutes.get('/', (c) => {
                         headers: { 'Authorization': \`Bearer \${token}\` }
                     });
 
+                    console.log('Response:', response.data);
+
                     if (response.data.success) {
                         // Redirect to Mercado Pago checkout
                         window.location.href = response.data.init_point;
@@ -356,8 +365,16 @@ pricingRoutes.get('/', (c) => {
                         alert('Erro ao criar checkout. Tente novamente.');
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('Erro ao processar pagamento: ' + (error.response?.data?.error || 'Erro desconhecido'));
+                    console.error('Error details:', error);
+                    console.error('Error response:', error.response);
+                    
+                    if (error.response?.status === 401) {
+                        alert('Sessão expirada. Faça login novamente.');
+                        localStorage.removeItem('fortetrain_token');
+                        window.location.href = '/auth/login?redirect=/pricing';
+                    } else {
+                        alert('Erro ao processar pagamento: ' + (error.response?.data?.error || 'Erro desconhecido'));
+                    }
                 }
             }
         </script>
