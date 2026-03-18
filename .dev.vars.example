@@ -10,9 +10,10 @@ YOUTUBE_API_KEY=your-youtube-api-key-here
 # JWT Secret (for authentication)
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 
-# Stripe API Keys (for payments)
-STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
-STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+# Mercado Pago API Keys (for payments - Brazilian market)
+MERCADOPAGO_ACCESS_TOKEN=APP_USR-your-access-token-here
+MERCADOPAGO_PUBLIC_KEY=APP_USR-your-public-key-here
+MERCADOPAGO_WEBHOOK_SECRET=your-webhook-secret-here
 
 # WhatsApp API (optional - for notifications)
 WHATSAPP_API_TOKEN=your-whatsapp-business-api-token

@@ -7,6 +7,9 @@ type Bindings = {
   OPENAI_API_KEY: string
   YOUTUBE_API_KEY: string
   JWT_SECRET: string
+  MERCADOPAGO_ACCESS_TOKEN: string
+  MERCADOPAGO_PUBLIC_KEY: string
+  MERCADOPAGO_WEBHOOK_SECRET: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -28,17 +31,21 @@ import { settingsRoute } from './routes/settings'
 import { workoutsRoute } from './routes/workouts'
 import { notificationsRoute } from './routes/notifications'
 import { adminRoutes } from './routes/admin'
+import pricingRoutes from './routes/pricing'
+import paymentsRoutes from './routes/payments'
 
 // Mount routes
 app.route('/', landingRoutes)
 app.route('/auth', authRoutes)
 app.route('/admin', adminRoutes)
+app.route('/pricing', pricingRoutes)
 app.route('/dashboard', dashboardRoutes)
 app.route('/dashboard/analytics', analyticsRoute)
 app.route('/dashboard/settings', settingsRoute)
 app.route('/dashboard/workouts', workoutsRoute)
 app.route('/dashboard/notifications', notificationsRoute)
 app.route('/api', apiRoutes)
+app.route('/api/payments', paymentsRoutes)
 app.route('/student', studentRoutes)
 
 // Default 404 handler
