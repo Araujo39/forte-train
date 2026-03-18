@@ -1495,3 +1495,73 @@ apiRoutes.post('/admin/refresh-metrics', async (c) => {
     return c.json({ error: 'Failed to refresh metrics' }, 500)
   }
 })
+
+// PUT /api/admin/plans - Update plan pricing and limits
+apiRoutes.put('/admin/plans', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = await verify(token, c.env.JWT_SECRET)
+    
+    if (payload.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin access required' }, 403)
+    }
+
+    const {
+      plan_id,
+      name,
+      price_monthly,
+      price_annual,
+      max_students,
+      max_ai_requests,
+      max_vision_requests,
+      features,
+      is_active
+    } = await c.req.json()
+
+    if (!plan_id) {
+      return c.json({ error: 'Missing plan_id' }, 400)
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+
+    // Update plan
+    await c.env.DB.prepare(`
+      UPDATE plan_limits 
+      SET 
+        name = ?,
+        price_monthly = ?,
+        price_annual = ?,
+        max_students = ?,
+        max_ai_requests = ?,
+        max_vision_requests = ?,
+        features = ?,
+        is_active = ?,
+        updated_at = ?
+      WHERE id = ?
+    `).bind(
+      name,
+      price_monthly,
+      price_annual,
+      max_students,
+      max_ai_requests,
+      max_vision_requests,
+      features,
+      is_active,
+      now,
+      plan_id
+    ).run()
+
+    return c.json({ 
+      success: true, 
+      message: 'Plan updated successfully' 
+    })
+  } catch (error) {
+    console.error('Update plan error:', error)
+    return c.json({ error: 'Failed to update plan' }, 500)
+  }
+})

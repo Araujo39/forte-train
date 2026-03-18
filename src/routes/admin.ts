@@ -277,6 +277,78 @@ adminRoutes.get('/', (c) => {
             </div>
         </div>
 
+        <!-- Edit Plan Modal -->
+        <div id="editPlanModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="card-dark rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold mb-4">
+                    <i class="fas fa-edit mr-2 text-orange-400"></i>Edit Plan
+                </h3>
+                <form id="editPlanForm" class="space-y-6">
+                    <!-- Plan Name -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Plan Name</label>
+                        <input type="text" id="edit-plan-name" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" required />
+                    </div>
+
+                    <!-- Plan Type (readonly) -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Plan Type</label>
+                        <input type="text" id="edit-plan-type" class="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 text-gray-400" readonly />
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Monthly Price (R$)</label>
+                            <input type="number" step="0.01" id="edit-price-monthly" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Annual Price (R$)</label>
+                            <input type="number" step="0.01" id="edit-price-annual" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" required />
+                        </div>
+                    </div>
+
+                    <!-- Limits -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Max Students</label>
+                            <input type="number" id="edit-max-students" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" placeholder="-1 = unlimited" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Max AI Requests/month</label>
+                            <input type="number" id="edit-max-ai" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" placeholder="-1 = unlimited" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Max Vision/month</label>
+                            <input type="number" id="edit-max-vision" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" placeholder="-1 = unlimited" />
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Features (one per line)</label>
+                        <textarea id="edit-features" rows="6" class="w-full px-4 py-3 rounded-lg bg-black border border-gray-700 text-white" placeholder="AI Workout Generator&#10;Vision Module&#10;WhatsApp Notifications"></textarea>
+                    </div>
+
+                    <!-- Active Toggle -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="edit-is-active" class="w-5 h-5 rounded border-gray-700 text-orange-500 focus:ring-orange-500" checked />
+                        <label for="edit-is-active" class="ml-3 text-sm font-semibold">Plan is active</label>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit" class="flex-1 btn-admin px-6 py-3 rounded-lg">
+                            <i class="fas fa-save mr-2"></i>Save Changes
+                        </button>
+                        <button type="button" onclick="closeEditPlanModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
             const token = localStorage.getItem('fortetrain_token');
@@ -432,6 +504,7 @@ adminRoutes.get('/', (c) => {
             }
 
             function displayPlans(plans) {
+                allPlans = plans; // Store for editing
                 const html = plans.map(p => \`
                     <div class="card-dark rounded-xl p-6">
                         <h3 class="text-xl font-bold mb-2">\${p.name}</h3>
@@ -501,9 +574,81 @@ adminRoutes.get('/', (c) => {
                 }
             }
 
-            function editPlan(planId) {
-                alert('Plan editing UI coming soon. Plan ID: ' + planId);
+            let selectedPlan = null;
+            let allPlans = [];
+
+            async function editPlan(planId) {
+                selectedPlan = allPlans.find(p => p.id === planId);
+                if (!selectedPlan) {
+                    alert('Plan not found');
+                    return;
+                }
+
+                // Populate form
+                document.getElementById('edit-plan-name').value = selectedPlan.name;
+                document.getElementById('edit-plan-type').value = selectedPlan.plan_type;
+                document.getElementById('edit-price-monthly').value = selectedPlan.price_monthly;
+                document.getElementById('edit-price-annual').value = selectedPlan.price_annual;
+                document.getElementById('edit-max-students').value = selectedPlan.max_students;
+                document.getElementById('edit-max-ai').value = selectedPlan.max_ai_requests || -1;
+                document.getElementById('edit-max-vision').value = selectedPlan.max_vision_requests || -1;
+                
+                // Parse features JSON
+                let features = '';
+                try {
+                    const featuresArray = JSON.parse(selectedPlan.features || '[]');
+                    features = featuresArray.join('\n');
+                } catch (e) {
+                    features = '';
+                }
+                document.getElementById('edit-features').value = features;
+                document.getElementById('edit-is-active').checked = selectedPlan.is_active === 1;
+
+                // Show modal
+                document.getElementById('editPlanModal').classList.remove('hidden');
             }
+
+            function closeEditPlanModal() {
+                document.getElementById('editPlanModal').classList.add('hidden');
+                selectedPlan = null;
+            }
+
+            // Handle plan edit form submission
+            document.getElementById('editPlanForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                try {
+                    const featuresText = document.getElementById('edit-features').value;
+                    const featuresArray = featuresText.split('\n').filter(f => f.trim());
+
+                    const payload = {
+                        plan_id: selectedPlan.id,
+                        name: document.getElementById('edit-plan-name').value,
+                        price_monthly: parseFloat(document.getElementById('edit-price-monthly').value),
+                        price_annual: parseFloat(document.getElementById('edit-price-annual').value),
+                        max_students: parseInt(document.getElementById('edit-max-students').value),
+                        max_ai_requests: parseInt(document.getElementById('edit-max-ai').value) || null,
+                        max_vision_requests: parseInt(document.getElementById('edit-max-vision').value) || null,
+                        features: JSON.stringify(featuresArray),
+                        is_active: document.getElementById('edit-is-active').checked ? 1 : 0
+                    };
+
+                    const response = await axios.put('/api/admin/plans', payload, {
+                        headers: { 'Authorization': \`Bearer \${token}\` }
+                    });
+
+                    if (response.data.success) {
+                        alert('Plan updated successfully!');
+                        closeEditPlanModal();
+                        loadDashboardData(); // Reload data
+                    } else {
+                        alert('Failed to update plan');
+                    }
+                } catch (error) {
+                    console.error('Error updating plan:', error);
+                    alert('Error: ' + (error.response?.data?.error || 'Failed to update plan'));
+                }
+            });
 
             // Search tenants
             document.getElementById('search-tenants').addEventListener('input', (e) => {
