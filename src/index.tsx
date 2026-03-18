@@ -33,6 +33,7 @@ import { notificationsRoute } from './routes/notifications'
 import { adminRoutes } from './routes/admin'
 import pricingRoutes from './routes/pricing'
 import paymentsRoutes from './routes/payments'
+import { studentDetailRoutes } from './routes/student-detail'
 
 // Mount routes
 app.route('/', landingRoutes)
@@ -44,6 +45,7 @@ app.route('/dashboard/analytics', analyticsRoute)
 app.route('/dashboard/settings', settingsRoute)
 app.route('/dashboard/workouts', workoutsRoute)
 app.route('/dashboard/notifications', notificationsRoute)
+app.route('/dashboard/student', studentDetailRoutes)
 app.route('/api', apiRoutes)
 app.route('/api/payments', paymentsRoutes)
 app.route('/student', studentRoutes)

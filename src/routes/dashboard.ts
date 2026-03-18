@@ -1411,6 +1411,11 @@ dashboardRoutes.get('/students', (c) => {
             }
 
             function viewDetails(studentId) {
+                // Redirect to new detailed student page
+                window.location.href = \`/dashboard/student/\${studentId}\`;
+            }
+
+            function viewDetailsOld(studentId) {
                 const student = allStudents.find(s => s.id === studentId);
                 if (!student) return;
 

@@ -1565,3 +1565,241 @@ apiRoutes.put('/admin/plans', async (c) => {
     return c.json({ error: 'Failed to update plan' }, 500)
   }
 })
+
+// ============================================
+// STUDENT PHOTOS API
+// ============================================
+
+// Get student photos
+apiRoutes.get('/students/:id/photos', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+
+    const photos = await env.DB.prepare(`
+      SELECT * FROM student_photos 
+      WHERE student_id = ? AND tenant_id = ?
+      ORDER BY taken_at DESC
+    `).bind(studentId, tenantId).all()
+
+    return c.json(photos.results || [])
+  } catch (error) {
+    console.error('Get student photos error:', error)
+    return c.json({ error: 'Failed to get photos' }, 500)
+  }
+})
+
+// Add student photo
+apiRoutes.post('/students/:id/photos', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+    
+    const { photo_url, photo_type, description, tags } = await c.req.json()
+    
+    if (!photo_url) {
+      return c.json({ error: 'Photo URL is required' }, 400)
+    }
+
+    const tagsJson = tags ? JSON.stringify(tags) : null
+    const now = Math.floor(Date.now() / 1000)
+
+    await env.DB.prepare(`
+      INSERT INTO student_photos (student_id, tenant_id, photo_url, photo_type, description, tags, taken_at, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(studentId, tenantId, photo_url, photo_type || 'progress', description, tagsJson, now, now).run()
+
+    return c.json({ success: true, message: 'Photo added successfully' })
+  } catch (error) {
+    console.error('Add student photo error:', error)
+    return c.json({ error: 'Failed to add photo' }, 500)
+  }
+})
+
+// ============================================
+// STUDENT MEASUREMENTS API
+// ============================================
+
+// Get student measurements
+apiRoutes.get('/students/:id/measurements', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+
+    const measurements = await env.DB.prepare(`
+      SELECT * FROM student_measurements 
+      WHERE student_id = ? AND tenant_id = ?
+      ORDER BY measured_at DESC
+    `).bind(studentId, tenantId).all()
+
+    return c.json(measurements.results || [])
+  } catch (error) {
+    console.error('Get student measurements error:', error)
+    return c.json({ error: 'Failed to get measurements' }, 500)
+  }
+})
+
+// Add student measurement
+apiRoutes.post('/students/:id/measurements', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+    
+    const data = await c.req.json()
+    const now = Math.floor(Date.now() / 1000)
+
+    await env.DB.prepare(`
+      INSERT INTO student_measurements (
+        student_id, tenant_id, weight, height, body_fat_percentage, muscle_mass, bmi,
+        chest, waist, hips, thigh_left, thigh_right, calf_left, calf_right,
+        bicep_left, bicep_right, forearm_left, forearm_right, neck, shoulders,
+        notes, measured_by, measured_at, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      studentId, tenantId,
+      data.weight || null, data.height || null, data.body_fat_percentage || null,
+      data.muscle_mass || null, data.bmi || null,
+      data.chest || null, data.waist || null, data.hips || null,
+      data.thigh_left || null, data.thigh_right || null,
+      data.calf_left || null, data.calf_right || null,
+      data.bicep_left || null, data.bicep_right || null,
+      data.forearm_left || null, data.forearm_right || null,
+      data.neck || null, data.shoulders || null,
+      data.notes || null, data.measured_by || 'trainer', now, now
+    ).run()
+
+    return c.json({ success: true, message: 'Measurement added successfully' })
+  } catch (error) {
+    console.error('Add student measurement error:', error)
+    return c.json({ error: 'Failed to add measurement' }, 500)
+  }
+})
+
+// ============================================
+// STUDENT GOALS API
+// ============================================
+
+// Get student goals
+apiRoutes.get('/students/:id/goals', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+
+    const goals = await env.DB.prepare(`
+      SELECT * FROM student_goals 
+      WHERE student_id = ? AND tenant_id = ?
+      ORDER BY created_at DESC
+    `).bind(studentId, tenantId).all()
+
+    return c.json(goals.results || [])
+  } catch (error) {
+    console.error('Get student goals error:', error)
+    return c.json({ error: 'Failed to get goals' }, 500)
+  }
+})
+
+// Add student goal
+apiRoutes.post('/students/:id/goals', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+    
+    const { goal_type, target_weight, target_body_fat, target_date, description, status } = await c.req.json()
+    
+    if (!goal_type) {
+      return c.json({ error: 'Goal type is required' }, 400)
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+
+    await env.DB.prepare(`
+      INSERT INTO student_goals (student_id, tenant_id, goal_type, target_weight, target_body_fat, target_date, description, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      studentId, tenantId, goal_type,
+      target_weight || null, target_body_fat || null, target_date || null,
+      description || null, status || 'active', now, now
+    ).run()
+
+    return c.json({ success: true, message: 'Goal added successfully' })
+  } catch (error) {
+    console.error('Add student goal error:', error)
+    return c.json({ error: 'Failed to add goal' }, 500)
+  }
+})
+
+// Get student workouts
+apiRoutes.get('/students/:id/workouts', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verifyToken(token, env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+
+    const workouts = await env.DB.prepare(`
+      SELECT * FROM workouts 
+      WHERE student_id = ? AND tenant_id = ?
+      ORDER BY created_at DESC
+      LIMIT 50
+    `).bind(studentId, tenantId).all()
+
+    return c.json(workouts.results || [])
+  } catch (error) {
+    console.error('Get student workouts error:', error)
+    return c.json({ error: 'Failed to get workouts' }, 500)
+  }
+})
