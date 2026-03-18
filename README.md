@@ -2,7 +2,7 @@
 
 ![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-IA-CCFF00?style=for-the-badge&logo=dumbbell)
 ![Status](https://img.shields.io/badge/Status-MVP-success?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-4.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-5.0-blue?style=for-the-badge)
 
 ## 🚀 Visão Geral
 
@@ -16,6 +16,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 - **Landing Page Integrada**: Página de vendas pronta para captar alunos
 - **Multi-Tenant Seguro**: Arquitetura multi-tenant com isolamento total de dados
 - **🆕 Super Admin Dashboard**: Visão macro do negócio com métricas financeiras (MRR/ARR), health score e impersonation
+- **🆕 Student Details Page**: Página completa de detalhes do aluno com fotos de progresso, medições corporais e metas
 
 ## 🌐 URLs do Projeto
 
@@ -47,6 +48,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/dashboard/settings` | **Configurações e API Keys** |
 | `/student/app` | **WebApp do Aluno (Player de Treino + Vision)** |
 | **🆕 `/admin`** | **Super Admin Dashboard (Business View)** |
+| **🆕 `/dashboard/student/:id`** | **Página de Detalhes do Aluno (Fotos, Medições, Metas)** |
 | `/api/auth/login` | API de autenticação |
 | `/api/dashboard/stats` | Estatísticas do dashboard |
 | `/api/students` | Gestão de alunos (CRUD) |
@@ -145,7 +147,15 @@ URL: https://fortetrain.pages.dev/student/app
   - [x] **Engagement Metrics**: Total students, AI workouts, Vision requests
 - [x] **Banco de dados D1 multi-tenant** com isolamento de dados
 - [x] **Gestão de alunos** completa com filtros, busca e cadastro
-- [x] **Modal de detalhes do aluno** com 4 abas (dados pessoais, treinos, pagamentos, evolução)
+- [x] **🆕 Página de Detalhes do Aluno** (/dashboard/student/:id):
+  - [x] **5 Tabs**: Visão Geral, Fotos de Progresso, Medições & Evolução, Histórico de Treinos, Metas
+  - [x] **Galeria de Fotos**: Upload, filtros (before/after/progress), visualização em grid
+  - [x] **Medições Corporais**: Peso, altura, BF%, massa muscular, circunferências (23 métricas)
+  - [x] **Gráficos de Evolução**: Chart.js para peso e gordura corporal ao longo do tempo
+  - [x] **Sistema de Metas**: Criação de objetivos (weight_loss, muscle_gain, endurance, strength)
+  - [x] **Stats Cards**: Contador de treinos, fotos, medições e metas
+  - [x] **Histórico Completo**: Tabela com todas as medições organizadas por data
+- [x] **Modal de detalhes do aluno** (versão antiga - mantida para compatibilidade)
 - [x] **Alertas de inatividade** inteligentes (3+ dias sem treinar)
 - [x] **APIs REST completas** para todas as funcionalidades
 - [x] **Gerador de Treinos com IA** (interface completa com GPT-4o-mini)
@@ -183,6 +193,9 @@ tenants (Personal Trainers)
 ├── payments (Histórico de transações)
 ├── tenant_metrics (Health Score e engajamento)
 ├── students (Alunos)
+│   ├── student_photos (Fotos de progresso)
+│   ├── student_measurements (Medições corporais)
+│   ├── student_goals (Metas e objetivos)
 │   ├── workouts (Treinos)
 │   ├── workout_sessions (Sessões de treino)
 │   └── notifications_log (Notificações)
@@ -197,12 +210,16 @@ plan_limits (Configuração de planos)
 ```
 
 ### 📊 Estatísticas (Produção)
-- **16 tabelas** D1 (SQLite na edge)
+- **22 tabelas** D1 (SQLite na edge)
 - **5 Personal Trainers** demo
 - **74 alunos** total
-- **127 registros** de seed data
+- **7 fotos** de progresso
+- **9 medições** corporais
+- **6 metas** ativas/completas
+- **150 registros** de seed data
 - **MRR**: R$ 999.60
 - **ARR**: R$ 11,995.20
+- **Build size**: 411 KB (bundle SSR)
 
 ### 📊 Principais Tabelas
 
