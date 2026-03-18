@@ -9,6 +9,7 @@ type Bindings = {
   MERCADOPAGO_ACCESS_TOKEN: string
   MERCADOPAGO_PUBLIC_KEY: string
   MERCADOPAGO_WEBHOOK_SECRET: string
+  APP_URL?: string  // Base URL for the application
 }
 
 export const paymentsRoutes = new Hono<{ Bindings: Bindings }>()
@@ -48,6 +49,9 @@ paymentsRoutes.post('/create-preference', async (c) => {
     const price = getPlanPrice(plan_type, billing_cycle)
     const planName = getPlanName(plan_type)
 
+    // Get base URL
+    const baseUrl = c.env.APP_URL || 'https://fortetrain.pages.dev'
+
     // Initialize Mercado Pago client
     const mp = new MercadoPagoClient({
       accessToken: c.env.MERCADOPAGO_ACCESS_TOKEN,
@@ -73,13 +77,13 @@ paymentsRoutes.post('/create-preference', async (c) => {
         email: tenant.email as string
       },
       back_urls: {
-        success: 'https://fortetrain.pages.dev/dashboard?payment=success',
-        failure: 'https://fortetrain.pages.dev/dashboard?payment=failure',
-        pending: 'https://fortetrain.pages.dev/dashboard?payment=pending'
+        success: `${baseUrl}/dashboard?payment=success`,
+        failure: `${baseUrl}/dashboard?payment=failure`,
+        pending: `${baseUrl}/dashboard?payment=pending`
       },
       auto_return: 'approved',
       external_reference: externalReference,
-      notification_url: 'https://fortetrain.pages.dev/api/payments/webhook',
+      notification_url: `${baseUrl}/api/payments/webhook`,
       metadata: {
         tenant_id: payload.tenantId,
         plan_type,
@@ -134,6 +138,9 @@ paymentsRoutes.post('/create-subscription', async (c) => {
     const price = getPlanPrice(plan_type, 'monthly')
     const planName = getPlanName(plan_type)
 
+    // Get base URL
+    const baseUrl = c.env.APP_URL || 'https://fortetrain.pages.dev'
+
     // Initialize Mercado Pago client
     const mp = new MercadoPagoClient({
       accessToken: c.env.MERCADOPAGO_ACCESS_TOKEN,
@@ -149,7 +156,7 @@ paymentsRoutes.post('/create-subscription', async (c) => {
         transaction_amount: price,
         currency_id: 'BRL'
       },
-      back_url: 'https://fortetrain.pages.dev/dashboard?subscription=success',
+      back_url: `${baseUrl}/dashboard?subscription=success`,
       payer_email: tenant.email as string,
       external_reference: `fortetrain-sub-${payload.tenantId}-${Date.now()}`
     })

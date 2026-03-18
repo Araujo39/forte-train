@@ -1,6 +1,9 @@
 # Environment Variables for Local Development
 # DO NOT commit this file to version control
 
+# Application URL (production domain)
+APP_URL=https://fortetrain.com
+
 # OpenAI API Key (for AI workout generation and Vision module)
 OPENAI_API_KEY=your-openai-api-key-here
 
