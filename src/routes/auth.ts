@@ -128,9 +128,19 @@ authRoutes.get('/login', (c) => {
                     });
 
                     if (response.data.token) {
-                        localStorage.setItem('fortetrain_token', response.data.token);
+                        localStorage.setItem('token', response.data.token);
                         localStorage.setItem('fortetrain_user', JSON.stringify(response.data.user));
-                        window.location.href = '/dashboard';
+                        
+                        // Redirect based on user role
+                        const userRole = response.data.user.role;
+                        if (userRole === 'admin') {
+                            window.location.href = '/admin';
+                        } else if (userRole === 'student') {
+                            window.location.href = '/student/dashboard';
+                        } else {
+                            // Personal trainer
+                            window.location.href = '/dashboard';
+                        }
                     }
                 } catch (error) {
                     alert('Erro ao fazer login: ' + (error.response?.data?.error || 'Erro desconhecido'));

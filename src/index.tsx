@@ -34,6 +34,7 @@ import { adminRoutes } from './routes/admin'
 import pricingRoutes from './routes/pricing'
 import paymentsRoutes from './routes/payments'
 import { studentDetailRoutes } from './routes/student-detail'
+import { studentDashboardRoutes } from './routes/student-dashboard'
 
 // Mount routes
 app.route('/', landingRoutes)
@@ -48,6 +49,7 @@ app.route('/dashboard/notifications', notificationsRoute)
 app.route('/dashboard/student', studentDetailRoutes)
 app.route('/api', apiRoutes)
 app.route('/api/payments', paymentsRoutes)
+app.route('/student/dashboard', studentDashboardRoutes)
 app.route('/student', studentRoutes)
 
 // Default 404 handler
