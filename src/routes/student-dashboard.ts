@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 
 export const studentDashboardRoutes = new Hono()
 
-// Student Dashboard - Mobile First
+// Elite Student Dashboard - Carbon Performance Design
 studentDashboardRoutes.get('/', (c) => {
   return c.html(`
     <!DOCTYPE html>
@@ -10,170 +10,675 @@ studentDashboardRoutes.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Meu Treino - ForteTrain</title>
+        <title>ForteTrain - Elite Dashboard</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
+            * {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            }
+            
             body {
                 background: #0D0D0D;
                 color: #FFFFFF;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                padding-bottom: 80px; /* Space for bottom nav */
+                padding-bottom: 90px;
+                overflow-x: hidden;
             }
-            .card-dark {
-                background: #1A1A1A;
-                border: 1px solid #333;
+
+            /* Glassmorphism Base */
+            .glass {
+                background: rgba(26, 26, 26, 0.7);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.05);
             }
-            .btn-green-neon {
-                background: #00FF88;
+
+            .glass-strong {
+                background: rgba(26, 26, 26, 0.85);
+                backdrop-filter: blur(30px);
+                -webkit-backdrop-filter: blur(30px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            /* Neon Gradient */
+            .neon-gradient {
+                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+            }
+
+            .neon-gradient-text {
+                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            /* Header Elite */
+            .header-elite {
+                background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(13, 13, 13, 0.8) 100%);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid rgba(204, 255, 0, 0.1);
+            }
+
+            .greeting-dynamic {
+                font-size: 1.5rem;
+                font-weight: 800;
+                letter-spacing: -0.02em;
+            }
+
+            /* Flame Counter with Gradient */
+            .flame-counter {
+                background: linear-gradient(135deg, #FF6B35 0%, #FF4757 100%);
+                padding: 0.6rem 1.2rem;
+                border-radius: 2rem;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                box-shadow: 0 0 30px rgba(255, 75, 87, 0.4);
+                animation: flame-pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes flame-pulse {
+                0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 75, 87, 0.4); }
+                50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 75, 87, 0.6); }
+            }
+
+            .flame-icon {
+                font-size: 1.2rem;
+                animation: flame-flicker 0.5s ease-in-out infinite alternate;
+            }
+
+            @keyframes flame-flicker {
+                0% { transform: translateY(0); }
+                100% { transform: translateY(-2px); }
+            }
+
+            /* Profile Photo Round */
+            .profile-photo {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 900;
+                font-size: 1.2rem;
                 color: #0D0D0D;
-                font-weight: bold;
-                transition: all 0.3s;
-                box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+                box-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
             }
-            .btn-green-neon:hover {
-                transform: scale(1.02);
-                box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
-            }
-            .btn-blue {
-                background: #00D4FF;
-                color: #0D0D0D;
-                font-weight: bold;
-                transition: all 0.3s;
-            }
-            .btn-blue:hover {
-                background: #00B8E0;
-            }
-            .stat-card {
-                background: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
-                border: 1px solid #333;
-            }
-            .bottom-nav {
+
+            /* Bottom Navigation Glassmorphism */
+            .bottom-nav-elite {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: #0D0D0D;
-                border-top: 1px solid #333;
+                background: rgba(13, 13, 13, 0.85);
+                backdrop-filter: blur(30px);
+                -webkit-backdrop-filter: blur(30px);
+                border-top: 1px solid rgba(204, 255, 0, 0.1);
                 display: flex;
                 justify-content: space-around;
-                padding: 1rem 0;
+                padding: 1.2rem 0;
                 z-index: 50;
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
             }
-            .nav-item {
+
+            .nav-item-elite {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 color: #666;
-                font-size: 0.75rem;
+                font-size: 0.7rem;
+                font-weight: 600;
                 cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+            }
+
+            .nav-item-elite i {
+                font-size: 1.5rem;
+                margin-bottom: 0.35rem;
                 transition: all 0.3s;
             }
-            .nav-item.active {
-                color: #00FF88;
+
+            .nav-item-elite.active {
+                color: #CCFF00;
             }
-            .nav-item i {
+
+            .nav-item-elite.active i {
+                filter: drop-shadow(0 0 15px rgba(204, 255, 0, 0.8));
+                animation: glow-pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes glow-pulse {
+                0%, 100% { filter: drop-shadow(0 0 15px rgba(204, 255, 0, 0.8)); }
+                50% { filter: drop-shadow(0 0 25px rgba(204, 255, 0, 1)); }
+            }
+
+            /* Stat Cards Glassmorphism */
+            .stat-card-elite {
+                background: rgba(26, 26, 26, 0.7);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(204, 255, 0, 0.1);
+                border-radius: 1rem;
+                padding: 1.5rem;
+                text-align: center;
+                transition: all 0.3s;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .stat-card-elite::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, rgba(204, 255, 0, 0.5), transparent);
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            .stat-card-elite:hover::before {
+                opacity: 1;
+            }
+
+            .stat-card-elite:hover {
+                transform: translateY(-2px);
+                border-color: rgba(204, 255, 0, 0.3);
+                box-shadow: 0 10px 30px rgba(204, 255, 0, 0.1);
+            }
+
+            /* Donut Chart Container */
+            .donut-container {
+                width: 60px;
+                height: 60px;
+                margin: 0 auto 0.5rem;
+            }
+
+            /* Weight Plate Icon with Glow */
+            .weight-plate {
+                font-size: 2.5rem;
+                color: #00D4FF;
+                filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.6));
+                animation: rotate-plate 8s linear infinite;
+            }
+
+            @keyframes rotate-plate {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* Treino do Dia Card - Neon Border Animated */
+            .workout-today-card {
+                background: rgba(26, 26, 26, 0.8);
+                backdrop-filter: blur(20px);
+                border-radius: 1.5rem;
+                padding: 2rem;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .workout-today-card::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 1.5rem;
+                padding: 2px;
+                background: linear-gradient(45deg, #CCFF00, #99FF00, #00FF88, #00D4FF, #CCFF00);
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+                animation: neon-rotate 4s linear infinite;
+                background-size: 300% 300%;
+            }
+
+            @keyframes neon-rotate {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+
+            /* Iniciar Treino Button - Larger with Gradient */
+            .btn-start-workout {
+                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+                color: #0D0D0D;
+                font-weight: 800;
+                font-size: 1.2rem;
+                padding: 1.5rem 3rem;
+                border-radius: 1rem;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 10px 40px rgba(204, 255, 0, 0.3);
+                display: inline-flex;
+                align-items: center;
+                gap: 0.8rem;
+            }
+
+            .btn-start-workout:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 50px rgba(204, 255, 0, 0.5);
+            }
+
+            .btn-start-workout i {
                 font-size: 1.5rem;
-                margin-bottom: 0.25rem;
             }
-            .workout-card {
-                background: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
-                border-left: 4px solid #00FF88;
+
+            .play-icon-hollow {
+                width: 0;
+                height: 0;
+                border-left: 20px solid #0D0D0D;
+                border-top: 12px solid transparent;
+                border-bottom: 12px solid transparent;
             }
-            .exercise-item {
-                background: #0D0D0D;
-                border: 1px solid #333;
-                padding: 1rem;
-                margin-bottom: 0.5rem;
-                border-radius: 0.5rem;
-            }
-            .badge {
+
+            /* 3D Metallic Badges */
+            .badge-3d {
                 display: inline-block;
-                padding: 0.5rem 1rem;
+                padding: 0.8rem 1.5rem;
                 border-radius: 2rem;
-                font-size: 0.875rem;
-                font-weight: bold;
+                font-size: 0.85rem;
+                font-weight: 700;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s;
             }
-            .badge-gold {
+
+            .badge-3d-gold {
                 background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
                 color: #0D0D0D;
+                box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
             }
-            .badge-silver {
-                background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+
+            .badge-3d-silver {
+                background: linear-gradient(135deg, #E8E8E8 0%, #A0A0A0 100%);
                 color: #0D0D0D;
+                box-shadow: 0 8px 20px rgba(200, 200, 200, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
             }
-            .badge-bronze {
+
+            .badge-3d-bronze {
                 background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
                 color: #FFFFFF;
+                box-shadow: 0 8px 20px rgba(205, 127, 50, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             }
-            .timer-display {
-                font-size: 3rem;
-                font-weight: bold;
-                text-align: center;
-                color: #00FF88;
-                font-family: 'Courier New', monospace;
+
+            .badge-3d-locked {
+                background: linear-gradient(135deg, #333 0%, #1A1A1A 100%);
+                color: #666;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             }
-            .body-map {
-                position: relative;
-                width: 100%;
-                max-width: 300px;
-                margin: 0 auto;
-            }
-            .pain-point {
+
+            .badge-3d::before {
+                content: '';
                 position: absolute;
-                width: 20px;
-                height: 20px;
-                background: #FF3B30;
-                border-radius: 50%;
-                border: 2px solid #FFFFFF;
-                cursor: pointer;
-                animation: pulse 2s infinite;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+                transform: rotate(45deg);
+                animation: shimmer 3s infinite;
             }
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); opacity: 1; }
-                50% { transform: scale(1.2); opacity: 0.8; }
+
+            .badge-3d-locked::before {
+                animation: none;
             }
-            .progress-ring {
-                transform: rotate(-90deg);
+
+            @keyframes shimmer {
+                0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+                100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
             }
-            .progress-ring-circle {
-                transition: stroke-dashoffset 0.35s;
-                transform-origin: 50% 50%;
+
+            /* Consistency Chart - Rounded Bars */
+            .chart-container-rounded {
+                height: 300px;
+                position: relative;
+                background: rgba(26, 26, 26, 0.5);
+                border-radius: 1rem;
+                padding: 1rem;
             }
-            .section {
-                display: none;
+
+            /* Timeline de Transformação */
+            .timeline-card {
+                background: rgba(26, 26, 26, 0.8);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(204, 255, 0, 0.1);
+                border-radius: 1.5rem;
+                padding: 2rem;
+                margin-bottom: 1.5rem;
             }
-            .section.active {
-                display: block;
+
+            .before-after-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
             }
-            .streak-indicator {
+
+            .photo-comparison {
+                position: relative;
+                aspect-ratio: 3/4;
+                border-radius: 1rem;
+                overflow: hidden;
+                border: 2px solid rgba(204, 255, 0, 0.2);
+            }
+
+            .photo-comparison img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .photo-label {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+                padding: 1rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .stats-change {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .stat-change-item {
+                text-align: center;
+            }
+
+            .stat-change-value {
+                font-size: 2rem;
+                font-weight: 900;
                 background: linear-gradient(135deg, #FF6B35 0%, #FF4757 100%);
-                color: white;
-                padding: 0.5rem 1rem;
-                border-radius: 2rem;
-                font-weight: bold;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .stat-change-value.positive {
+                background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            /* Notification List Cards */
+            .notification-card {
+                background: rgba(26, 26, 26, 0.7);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 1rem;
+                padding: 1.2rem;
+                margin-bottom: 1rem;
+                transition: all 0.3s;
+            }
+
+            .notification-card:hover {
+                border-color: rgba(204, 255, 0, 0.2);
+                transform: translateX(4px);
+            }
+
+            .notification-card.personal {
+                border-left: 4px solid #00FF88;
+            }
+
+            .notification-card.system {
+                border-left: 4px solid #FFA500;
+            }
+
+            .notification-card.reminder {
+                border-left: 4px solid #00D4FF;
+            }
+
+            .mark-all-read {
+                background: rgba(204, 255, 0, 0.1);
+                color: #CCFF00;
+                padding: 0.6rem 1.2rem;
+                border-radius: 0.5rem;
+                border: 1px solid rgba(204, 255, 0, 0.3);
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .mark-all-read:hover {
+                background: rgba(204, 255, 0, 0.2);
+            }
+
+            /* Profile Section */
+            .profile-header {
+                text-align: center;
+                padding: 2rem 0;
+            }
+
+            .profile-photo-large {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 900;
+                font-size: 3rem;
+                color: #0D0D0D;
+                margin: 0 auto 1rem;
+                box-shadow: 0 0 40px rgba(204, 255, 0, 0.4);
+            }
+
+            .member-since {
+                color: #999;
+                font-size: 0.9rem;
+            }
+
+            /* Subscription Badge with Pulse */
+            .subscription-badge {
                 display: inline-flex;
                 align-items: center;
                 gap: 0.5rem;
+                padding: 0.6rem 1.2rem;
+                border-radius: 2rem;
+                font-weight: 700;
+                animation: pulse-glow 2s ease-in-out infinite;
+            }
+
+            .subscription-badge.active {
+                background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);
+                color: #0D0D0D;
+                box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+            }
+
+            .subscription-badge.expired {
+                background: #FF3B30;
+                color: #FFFFFF;
+            }
+
+            @keyframes pulse-glow {
+                0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.4); }
+                50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.7); }
+            }
+
+            /* Injury Check-in Button - Yellow Warning */
+            .btn-injury-warning {
+                background: #FFCC00;
+                color: #0D0D0D;
+                font-weight: 700;
+                padding: 1rem 1.5rem;
+                border-radius: 1rem;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .btn-injury-warning:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+            }
+
+            .btn-injury-warning i {
+                font-size: 1.3rem;
+            }
+
+            /* Recovery Library - Netflix Style */
+            .recovery-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+
+            .recovery-video-card {
+                position: relative;
+                aspect-ratio: 16/9;
+                border-radius: 0.75rem;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.3s;
+                background: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
+            }
+
+            .recovery-video-card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(204, 255, 0, 0.2);
+            }
+
+            .recovery-video-thumb {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .recovery-play-overlay {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, 0.5);
+                transition: all 0.3s;
+            }
+
+            .recovery-video-card:hover .recovery-play-overlay {
+                background: rgba(0, 0, 0, 0.7);
+            }
+
+            .recovery-play-icon {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: rgba(204, 255, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: #0D0D0D;
+            }
+
+            .recovery-video-info {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+                padding: 0.8rem;
+            }
+
+            .recovery-video-title {
+                font-weight: 600;
+                font-size: 0.85rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .recovery-video-duration {
+                font-size: 0.7rem;
+                color: #999;
+            }
+
+            /* Modal Improvements */
+            .modal-elite {
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(10px);
+            }
+
+            .modal-content-elite {
+                background: rgba(26, 26, 26, 0.95);
+                backdrop-filter: blur(30px);
+                border: 1px solid rgba(204, 255, 0, 0.1);
+                border-radius: 1.5rem;
+            }
+
+            /* Section Transitions */
+            .section {
+                display: none;
+                animation: fadeIn 0.4s ease-in-out;
+            }
+
+            .section.active {
+                display: block;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Responsive */
+            @media (max-width: 640px) {
+                .greeting-dynamic {
+                    font-size: 1.2rem;
+                }
+                
+                .btn-start-workout {
+                    font-size: 1rem;
+                    padding: 1.2rem 2rem;
+                }
+
+                .before-after-container {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                }
+
+                .recovery-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
             }
         </style>
     </head>
     <body>
-        <!-- Header -->
-        <div class="sticky top-0 z-40 bg-black bg-opacity-95 backdrop-blur-sm border-b border-gray-800">
+        <!-- Header Elite -->
+        <div class="header-elite sticky top-0 z-40">
             <div class="px-4 py-4">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h1 class="text-2xl font-bold">Olá, <span id="studentName">Aluno</span>! 👋</h1>
-                        <p class="text-sm text-gray-400" id="currentDate"></p>
+                        <h1 class="greeting-dynamic" id="dynamicGreeting">
+                            <span id="greetingText">Foco hoje</span>, <span id="studentName" class="neon-gradient-text">Aluno</span>! <span id="greetingEmoji">🔥</span>
+                        </h1>
+                        <p class="text-sm text-gray-400 mt-1" id="currentDate"></p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <div class="streak-indicator">
-                            <i class="fas fa-fire"></i>
-                            <span id="streakDays">0</span> dias
+                        <div class="flame-counter">
+                            <i class="fas fa-fire flame-icon"></i>
+                            <span id="streakDays">0</span>
                         </div>
-                        <button onclick="logout()" class="text-gray-400 hover:text-white">
+                        <div class="profile-photo" id="profilePhoto">
+                            JD
+                        </div>
+                        <button onclick="logout()" class="text-gray-400 hover:text-white transition">
                             <i class="fas fa-sign-out-alt text-xl"></i>
                         </button>
                     </div>
@@ -184,47 +689,48 @@ studentDashboardRoutes.get('/', (c) => {
         <!-- Main Content -->
         <div class="px-4 py-6">
             
-            <!-- SECTION 1: HOME / TREINO DO DIA -->
+            <!-- SECTION 1: HOME -->
             <div id="section-home" class="section active">
                 
-                <!-- Quick Stats -->
+                <!-- Quick Stats with Glassmorphism -->
                 <div class="grid grid-cols-3 gap-3 mb-6">
-                    <div class="stat-card p-4 rounded-lg text-center">
-                        <div class="text-2xl font-bold" style="color: #00FF88;" id="weekWorkouts">0</div>
-                        <div class="text-xs text-gray-400">Treinos/Sem</div>
+                    <div class="stat-card-elite">
+                        <div class="donut-container">
+                            <canvas id="donutChart"></canvas>
+                        </div>
+                        <div class="text-2xl font-bold neon-gradient-text" id="weekWorkouts">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Treinos/Sem</div>
                     </div>
-                    <div class="stat-card p-4 rounded-lg text-center">
+                    <div class="stat-card-elite">
+                        <i class="fas fa-weight weight-plate"></i>
                         <div class="text-2xl font-bold" style="color: #00D4FF;" id="totalWeight">0</div>
-                        <div class="text-xs text-gray-400">kg Total</div>
+                        <div class="text-xs text-gray-400 mt-1">kg Total</div>
                     </div>
-                    <div class="stat-card p-4 rounded-lg text-center">
+                    <div class="stat-card-elite">
+                        <i class="fas fa-heartbeat" style="color: #FF6B35; font-size: 2rem;"></i>
                         <div class="text-2xl font-bold" style="color: #FF6B35;" id="currentWeight">-</div>
-                        <div class="text-xs text-gray-400">Peso Atual</div>
+                        <div class="text-xs text-gray-400 mt-1">Peso Atual</div>
                     </div>
                 </div>
 
-                <!-- Treino do Dia -->
+                <!-- Treino do Dia - Neon Border -->
                 <div class="mb-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-xl font-bold">
-                            <i class="fas fa-dumbbell mr-2" style="color: #00FF88;"></i>
-                            Treino de Hoje
-                        </h2>
-                        <button onclick="openVisionModal()" class="btn-blue px-4 py-2 rounded-lg">
-                            <i class="fas fa-camera mr-2"></i>
-                            Vision IA
-                        </button>
-                    </div>
+                    <h2 class="text-xl font-bold mb-3">
+                        <i class="fas fa-dumbbell mr-2 neon-gradient-text"></i>
+                        Treino de Hoje
+                    </h2>
 
-                    <div id="todayWorkout" class="workout-card p-6 rounded-xl">
-                        <div class="text-center py-8">
-                            <i class="fas fa-spinner fa-spin text-4xl text-gray-600 mb-4"></i>
-                            <p class="text-gray-400">Carregando treino...</p>
+                    <div class="workout-today-card">
+                        <div id="todayWorkout">
+                            <div class="text-center py-8">
+                                <i class="fas fa-spinner fa-spin text-4xl text-gray-600 mb-4"></i>
+                                <p class="text-gray-400">Carregando treino...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Badges/Conquistas -->
+                <!-- Badges 3D Metálicos -->
                 <div class="mb-6">
                     <h2 class="text-xl font-bold mb-3">
                         <i class="fas fa-trophy mr-2" style="color: #FFD700;"></i>
@@ -241,7 +747,7 @@ studentDashboardRoutes.get('/', (c) => {
                         <i class="fas fa-calendar-alt mr-2" style="color: #00D4FF;"></i>
                         Próximos Treinos
                     </h2>
-                    <div id="upcomingWorkouts">
+                    <div id="upcomingWorkouts" class="space-y-3">
                         <!-- Will be populated by JS -->
                     </div>
                 </div>
@@ -255,52 +761,65 @@ studentDashboardRoutes.get('/', (c) => {
                 </h2>
 
                 <!-- Consistency Chart -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">Consistência Semanal</h3>
-                    <div id="consistencyChartContainer" style="height: 300px; position: relative;">
+                    <div id="consistencyChartContainer" class="chart-container-rounded">
                         <canvas id="consistencyChart"></canvas>
                     </div>
                     <div id="consistencyEmptyState" class="hidden text-center py-8">
                         <i class="fas fa-calendar-times text-5xl text-gray-600 mb-4"></i>
                         <p class="text-gray-400 mb-4">Você ainda não registrou treinos esta semana.<br>Comece hoje!</p>
-                        <button onclick="switchSection('home'); scrollTo(0,0);" class="btn-green-neon px-6 py-3 rounded-lg inline-flex items-center">
-                            <i class="fas fa-play mr-2"></i>
+                        <button onclick="switchSection('home'); scrollTo(0,0);" class="btn-start-workout">
+                            <div class="play-icon-hollow"></div>
                             Iniciar Treino
                         </button>
                     </div>
                 </div>
 
+                <!-- Timeline de Transformação -->
+                <div class="timeline-card">
+                    <h3 class="text-lg font-bold mb-4">
+                        <i class="fas fa-exchange-alt mr-2 neon-gradient-text"></i>
+                        Timeline de Transformação
+                    </h3>
+                    <div id="transformationTimeline">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+
                 <!-- Volume Chart -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">Volume Total de Carga</h3>
-                    <canvas id="volumeChart" height="200"></canvas>
+                    <div class="chart-container-rounded">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Weight Evolution -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">Evolução de Peso</h3>
-                    <canvas id="weightEvolutionChart" height="200"></canvas>
-                </div>
-
-                <!-- Progress Photos -->
-                <div class="card-dark p-6 rounded-xl mb-6">
-                    <h3 class="text-lg font-bold mb-4">Fotos de Evolução</h3>
-                    <div id="progressPhotos" class="grid grid-cols-2 gap-4">
-                        <!-- Will be populated by JS -->
+                    <div class="chart-container-rounded">
+                        <canvas id="weightEvolutionChart"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- SECTION 3: NOTIFICATIONS -->
             <div id="section-notifications" class="section">
-                <h2 class="text-2xl font-bold mb-6">
-                    <i class="fas fa-bell mr-2" style="color: #FF6B35;"></i>
-                    Notificações
-                </h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">
+                        <i class="fas fa-bell mr-2" style="color: #FF6B35;"></i>
+                        Notificações
+                    </h2>
+                    <button class="mark-all-read">
+                        <i class="fas fa-check-double mr-2"></i>
+                        Marcar tudo como lido
+                    </button>
+                </div>
 
                 <!-- Messages from Personal -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-bold mb-3">Mensagens do Personal</h3>
+                    <h3 class="text-lg font-bold mb-3 text-gray-300">Mensagens do Personal</h3>
                     <div id="personalMessages">
                         <!-- Will be populated by JS -->
                     </div>
@@ -308,7 +827,7 @@ studentDashboardRoutes.get('/', (c) => {
 
                 <!-- System Alerts -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-bold mb-3">Alertas do Sistema</h3>
+                    <h3 class="text-lg font-bold mb-3 text-gray-300">Alertas do Sistema</h3>
                     <div id="systemAlerts">
                         <!-- Will be populated by JS -->
                     </div>
@@ -316,74 +835,68 @@ studentDashboardRoutes.get('/', (c) => {
 
                 <!-- Reminders -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-bold mb-3">Lembretes</h3>
+                    <h3 class="text-lg font-bold mb-3 text-gray-300">Lembretes</h3>
                     <div id="reminders">
-                        <div class="card-dark p-4 rounded-lg mb-3">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-tint text-2xl" style="color: #00D4FF;"></i>
-                                <div class="flex-1">
-                                    <div class="font-semibold">Hidratação</div>
-                                    <div class="text-sm text-gray-400">Beba água a cada 30 minutos</div>
-                                </div>
-                                <input type="checkbox" class="w-5 h-5">
-                            </div>
-                        </div>
+                        <!-- Will be populated by JS -->
                     </div>
                 </div>
             </div>
 
             <!-- SECTION 4: PROFILE -->
             <div id="section-profile" class="section">
-                <h2 class="text-2xl font-bold mb-6">
-                    <i class="fas fa-user-circle mr-2" style="color: #00FF88;"></i>
-                    Meu Perfil
-                </h2>
+                <div class="profile-header">
+                    <div class="profile-photo-large" id="profilePhotoLarge">JD</div>
+                    <h2 class="text-2xl font-bold mb-1" id="profileFullName">João Doe</h2>
+                    <p class="member-since">Membro desde <span id="memberSince">01/01/2024</span></p>
+                </div>
 
                 <!-- Subscription Status -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">Status da Assinatura</h3>
-                    <div id="subscriptionStatus">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-gray-400">Status</span>
-                            <span class="px-3 py-1 bg-green-600 rounded-full text-sm font-bold">Ativo</span>
-                        </div>
-                        <div class="flex items-center justify-between mb-4">
+                    <div class="text-center mb-4">
+                        <span class="subscription-badge active">
+                            <i class="fas fa-check-circle"></i>
+                            Ativo
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between py-2 border-b border-gray-700">
                             <span class="text-gray-400">Próxima Renovação</span>
                             <span id="nextRenewal">-</span>
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex justify-between py-2">
                             <span class="text-gray-400">Personal Trainer</span>
                             <span id="personalName">-</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Check-in de Lesões -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <!-- Check-in de Lesões - Yellow Warning -->
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">
-                        <i class="fas fa-heartbeat mr-2" style="color: #FF3B30;"></i>
-                        Check-in de Lesões
+                        <i class="fas fa-heartbeat mr-2" style="color: #FFCC00;"></i>
+                        Ponto de Atenção
                     </h3>
-                    <p class="text-sm text-gray-400 mb-4">Marque qualquer dor ou desconforto antes de treinar</p>
-                    <button onclick="openBodyMapModal()" class="btn-green-neon w-full py-3 rounded-lg">
-                        <i class="fas fa-user-injured mr-2"></i>
-                        Registrar Dor/Desconforto
+                    <p class="text-sm text-gray-400 mb-4">Relate qualquer dor ou desconforto antes de treinar</p>
+                    <button onclick="openBodyMapModal()" class="btn-injury-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Relatar Desconforto/Dor antes de Treinar
                     </button>
                 </div>
 
-                <!-- Biblioteca de Recuperação -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <!-- Biblioteca de Recuperação - Netflix Style -->
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">
                         <i class="fas fa-spa mr-2" style="color: #00D4FF;"></i>
                         Biblioteca de Recuperação
                     </h3>
-                    <div id="recoveryLibrary" class="space-y-3">
+                    <div id="recoveryLibrary" class="recovery-grid">
                         <!-- Will be populated by JS -->
                     </div>
                 </div>
 
                 <!-- Personal Info -->
-                <div class="card-dark p-6 rounded-xl mb-6">
+                <div class="glass-strong p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">Informações Pessoais</h3>
                     <div id="personalInfo">
                         <!-- Will be populated by JS -->
@@ -393,29 +906,82 @@ studentDashboardRoutes.get('/', (c) => {
 
         </div>
 
-        <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchSection('home')">
+        <!-- Bottom Navigation Elite -->
+        <div class="bottom-nav-elite">
+            <div class="nav-item-elite active" onclick="switchSection('home')">
                 <i class="fas fa-home"></i>
                 <span>Início</span>
             </div>
-            <div class="nav-item" onclick="switchSection('analytics')">
+            <div class="nav-item-elite" onclick="switchSection('analytics')">
                 <i class="fas fa-chart-bar"></i>
                 <span>Evolução</span>
             </div>
-            <div class="nav-item" onclick="switchSection('notifications')">
+            <div class="nav-item-elite" onclick="switchSection('notifications')">
                 <i class="fas fa-bell"></i>
                 <span>Avisos</span>
             </div>
-            <div class="nav-item" onclick="switchSection('profile')">
+            <div class="nav-item-elite" onclick="switchSection('profile')">
                 <i class="fas fa-user"></i>
                 <span>Perfil</span>
             </div>
         </div>
 
+        <!-- Workout Modal (Vision Button inside) -->
+        <div id="workoutModal" class="hidden fixed inset-0 modal-elite z-50 overflow-y-auto">
+            <div class="min-h-screen flex items-center justify-center p-4">
+                <div class="modal-content-elite p-6 rounded-xl max-w-2xl w-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold" id="workoutTitle">Treino</h3>
+                        <div class="flex gap-3">
+                            <button onclick="openVisionModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                                <i class="fas fa-camera mr-2"></i>
+                                Vision IA
+                            </button>
+                            <button onclick="closeWorkoutModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Timer -->
+                    <div class="text-center mb-6">
+                        <div style="font-size: 3rem; font-weight: bold; color: #00FF88; font-family: 'Courier New', monospace;" id="workoutTimer">00:00:00</div>
+                        <div class="flex gap-3 justify-center mt-4">
+                            <button id="startBtn" onclick="startWorkoutTimer()" class="btn-start-workout">
+                                <div class="play-icon-hollow"></div>
+                                Iniciar
+                            </button>
+                            <button id="pauseBtn" onclick="pauseWorkoutTimer()" class="hidden bg-blue-600 text-white px-6 py-3 rounded-lg font-bold">
+                                <i class="fas fa-pause mr-2"></i>
+                                Pausar
+                            </button>
+                            <button onclick="finishWorkout()" class="bg-red-600 text-white px-6 py-3 rounded-lg font-bold">
+                                <i class="fas fa-check mr-2"></i>
+                                Finalizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Exercises List -->
+                    <div id="exercisesList">
+                        <!-- Will be populated by JS -->
+                    </div>
+
+                    <!-- Rest Timer -->
+                    <div id="restTimer" class="hidden fixed bottom-20 left-0 right-0 bg-orange-600 text-white p-4 text-center">
+                        <div class="text-xl font-bold">Descanso</div>
+                        <div class="text-4xl font-bold" id="restTimerDisplay">00:60</div>
+                        <button onclick="skipRest()" class="mt-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-bold">
+                            Pular Descanso
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Vision Modal -->
-        <div id="visionModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
-            <div class="card-dark p-6 rounded-xl max-w-md w-full mx-4">
+        <div id="visionModal" class="hidden fixed inset-0 modal-elite z-50 flex items-center justify-center">
+            <div class="modal-content-elite p-6 rounded-xl max-w-md w-full mx-4">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold">Vision IA - Identificar Equipamento</h3>
                     <button onclick="closeVisionModal()" class="text-gray-400 hover:text-white">
@@ -425,8 +991,8 @@ studentDashboardRoutes.get('/', (c) => {
                 <div class="text-center py-8">
                     <i class="fas fa-camera text-6xl mb-4" style="color: #00D4FF;"></i>
                     <p class="text-gray-400 mb-4">Tire uma foto do equipamento</p>
-                    <button class="btn-green-neon px-6 py-3 rounded-lg">
-                        <i class="fas fa-camera mr-2"></i>
+                    <button class="btn-start-workout">
+                        <i class="fas fa-camera"></i>
                         Abrir Câmera
                     </button>
                 </div>
@@ -434,25 +1000,24 @@ studentDashboardRoutes.get('/', (c) => {
         </div>
 
         <!-- Body Map Modal -->
-        <div id="bodyMapModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center overflow-y-auto">
-            <div class="card-dark p-6 rounded-xl max-w-md w-full mx-4 my-8">
+        <div id="bodyMapModal" class="hidden fixed inset-0 modal-elite z-50 flex items-center justify-center overflow-y-auto">
+            <div class="modal-content-elite p-6 rounded-xl max-w-md w-full mx-4 my-8">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold">Mapa Corporal</h3>
+                    <h3 class="text-xl font-bold">Mapa Corporal - Relatar Dor</h3>
                     <button onclick="closeBodyMapModal()" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times text-2xl"></i>
                     </button>
                 </div>
                 <p class="text-sm text-gray-400 mb-4">Toque na área do corpo onde sente dor ou desconforto</p>
                 
-                <div class="body-map mb-6">
+                <div style="position: relative; width: 100%; max-width: 300px; margin: 0 auto 1.5rem;">
                     <svg viewBox="0 0 200 400" class="w-full">
-                        <!-- Simple body outline -->
-                        <ellipse cx="100" cy="30" rx="25" ry="30" fill="#2A2A2A" stroke="#00FF88" stroke-width="2"/>
-                        <rect x="75" y="55" width="50" height="80" rx="10" fill="#2A2A2A" stroke="#00FF88" stroke-width="2"/>
-                        <rect x="60" y="60" width="20" height="60" rx="5" fill="#2A2A2A" stroke="#00FF88" stroke-width="2"/>
-                        <rect x="120" y="60" width="20" height="60" rx="5" fill="#2A2A2A" stroke="#00FF88" stroke-width="2"/>
-                        <rect x="80" y="135" width="15" height="100" rx="7" fill="#2A2A2A" stroke="#00FF88" stroke-width="2"/>
-                        <rect x="105" y="135" width="15" height="100" rx="7" fill="#2A2A2A" stroke="#00FF88" stroke-width="2"/>
+                        <ellipse cx="100" cy="30" rx="25" ry="30" fill="#2A2A2A" stroke="#CCFF00" stroke-width="2"/>
+                        <rect x="75" y="55" width="50" height="80" rx="10" fill="#2A2A2A" stroke="#CCFF00" stroke-width="2"/>
+                        <rect x="60" y="60" width="20" height="60" rx="5" fill="#2A2A2A" stroke="#CCFF00" stroke-width="2"/>
+                        <rect x="120" y="60" width="20" height="60" rx="5" fill="#2A2A2A" stroke="#CCFF00" stroke-width="2"/>
+                        <rect x="80" y="135" width="15" height="100" rx="7" fill="#2A2A2A" stroke="#CCFF00" stroke-width="2"/>
+                        <rect x="105" y="135" width="15" height="100" rx="7" fill="#2A2A2A" stroke="#CCFF00" stroke-width="2"/>
                     </svg>
                 </div>
 
@@ -491,58 +1056,11 @@ studentDashboardRoutes.get('/', (c) => {
                         <label class="block text-sm font-semibold mb-2">Descrição (opcional)</label>
                         <textarea id="painDescription" rows="3" class="w-full px-4 py-2 bg-black border border-gray-600 rounded-lg text-white" placeholder="Descreva o tipo de dor..."></textarea>
                     </div>
-                    <button type="submit" class="btn-green-neon w-full py-3 rounded-lg">
-                        <i class="fas fa-save mr-2"></i>
+                    <button type="submit" class="btn-start-workout w-full">
+                        <i class="fas fa-save"></i>
                         Registrar Check-in
                     </button>
                 </form>
-            </div>
-        </div>
-
-        <!-- Workout Modal -->
-        <div id="workoutModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 overflow-y-auto">
-            <div class="min-h-screen flex items-center justify-center p-4">
-                <div class="card-dark p-6 rounded-xl max-w-2xl w-full">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-bold" id="workoutTitle">Treino</h3>
-                        <button onclick="closeWorkoutModal()" class="text-gray-400 hover:text-white">
-                            <i class="fas fa-times text-2xl"></i>
-                        </button>
-                    </div>
-
-                    <!-- Timer -->
-                    <div class="text-center mb-6">
-                        <div class="timer-display" id="workoutTimer">00:00:00</div>
-                        <div class="flex gap-3 justify-center mt-4">
-                            <button id="startBtn" onclick="startWorkoutTimer()" class="btn-green-neon px-6 py-3 rounded-lg">
-                                <i class="fas fa-play mr-2"></i>
-                                Iniciar
-                            </button>
-                            <button id="pauseBtn" onclick="pauseWorkoutTimer()" class="hidden btn-blue px-6 py-3 rounded-lg">
-                                <i class="fas fa-pause mr-2"></i>
-                                Pausar
-                            </button>
-                            <button onclick="finishWorkout()" class="bg-red-600 text-white px-6 py-3 rounded-lg font-bold">
-                                <i class="fas fa-check mr-2"></i>
-                                Finalizar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Exercises List -->
-                    <div id="exercisesList">
-                        <!-- Will be populated by JS -->
-                    </div>
-
-                    <!-- Rest Timer -->
-                    <div id="restTimer" class="hidden fixed bottom-20 left-0 right-0 bg-orange-600 text-white p-4 text-center">
-                        <div class="text-xl font-bold">Descanso</div>
-                        <div class="text-4xl font-bold" id="restTimerDisplay">00:60</div>
-                        <button onclick="skipRest()" class="mt-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-bold">
-                            Pular Descanso
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -567,9 +1085,34 @@ studentDashboardRoutes.get('/', (c) => {
 
             axios.defaults.headers.common['Authorization'] = \`Bearer \${token}\`;
 
+            // Dynamic Greeting
+            function setDynamicGreeting() {
+                const hour = new Date().getHours();
+                let greeting, emoji;
+                
+                if (hour >= 5 && hour < 12) {
+                    greeting = 'Bom dia';
+                    emoji = '☀️';
+                } else if (hour >= 12 && hour < 18) {
+                    greeting = 'Boa tarde';
+                    emoji = '🔥';
+                } else if (hour >= 18 && hour < 22) {
+                    greeting = 'Hustle Mode: ON';
+                    emoji = '💪';
+                } else {
+                    greeting = 'Modo Noturno';
+                    emoji = '🌙';
+                }
+                
+                document.getElementById('greetingText').textContent = greeting;
+                document.getElementById('greetingEmoji').textContent = emoji;
+            }
+
             // Initialize
             async function init() {
                 try {
+                    setDynamicGreeting();
+                    
                     // Decode JWT to get student info
                     const payload = JSON.parse(atob(token.split('.')[1]));
                     
@@ -587,7 +1130,12 @@ studentDashboardRoutes.get('/', (c) => {
                     studentData = studentRes.data;
                     
                     const firstName = studentData.full_name ? studentData.full_name.split(' ')[0] : 'Aluno';
+                    const initials = studentData.full_name ? studentData.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'AL';
+                    
                     document.getElementById('studentName').textContent = firstName;
+                    document.getElementById('profilePhoto').textContent = initials;
+                    document.getElementById('profilePhotoLarge').textContent = initials;
+                    document.getElementById('profileFullName').textContent = studentData.full_name || 'Aluno';
                     
                     // Load all data
                     await Promise.all([
@@ -637,7 +1185,6 @@ studentDashboardRoutes.get('/', (c) => {
             }
 
             async function loadBadges(studentId) {
-                // Mock badges for now
                 badges = [
                     { name: '10 Dias Seguidos', icon: 'fire', color: 'gold', unlocked: true },
                     { name: 'Recorde de Carga', icon: 'trophy', color: 'gold', unlocked: true },
@@ -656,17 +1203,36 @@ studentDashboardRoutes.get('/', (c) => {
                 }).length;
                 
                 document.getElementById('weekWorkouts').textContent = thisWeekWorkouts;
-                document.getElementById('totalWeight').textContent = '1250'; // Mock
+                document.getElementById('totalWeight').textContent = '1250';
                 
                 if (measurements.length > 0) {
                     document.getElementById('currentWeight').textContent = measurements[0].weight + 'kg';
                 }
                 
-                // Streak (mock for now)
+                // Streak
                 document.getElementById('streakDays').textContent = thisWeekWorkouts;
 
+                // Donut Chart
+                const donutCtx = document.getElementById('donutChart');
+                new Chart(donutCtx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [thisWeekWorkouts, 7 - thisWeekWorkouts],
+                            backgroundColor: ['#CCFF00', '#2A2A2A'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        cutout: '75%',
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                    }
+                });
+
                 // Today's workout
-                const todayWorkout = workouts[0]; // Get most recent
+                const todayWorkout = workouts[0];
                 
                 if (todayWorkout) {
                     document.getElementById('todayWorkout').innerHTML = \`
@@ -674,9 +1240,9 @@ studentDashboardRoutes.get('/', (c) => {
                             <h3 class="text-2xl font-bold mb-2">\${todayWorkout.title}</h3>
                             <p class="text-gray-400">\${todayWorkout.description || ''}</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="grid grid-cols-2 gap-4 mb-6">
                             <div class="text-center">
-                                <div class="text-3xl font-bold" style="color: #00FF88;">\${todayWorkout.exercises ? JSON.parse(todayWorkout.exercises).length : 0}</div>
+                                <div class="text-3xl font-bold neon-gradient-text">\${todayWorkout.exercises ? JSON.parse(todayWorkout.exercises).length : 0}</div>
                                 <div class="text-sm text-gray-400">Exercícios</div>
                             </div>
                             <div class="text-center">
@@ -684,8 +1250,8 @@ studentDashboardRoutes.get('/', (c) => {
                                 <div class="text-sm text-gray-400">Duração</div>
                             </div>
                         </div>
-                        <button onclick="openWorkoutModal('\${todayWorkout.id}')" class="btn-green-neon w-full py-4 rounded-xl text-lg">
-                            <i class="fas fa-play mr-2"></i>
+                        <button onclick="openWorkoutModal('\${todayWorkout.id}')" class="btn-start-workout w-full">
+                            <div class="play-icon-hollow"></div>
                             Iniciar Treino
                         </button>
                     \`;
@@ -699,9 +1265,9 @@ studentDashboardRoutes.get('/', (c) => {
                     \`;
                 }
 
-                // Badges
+                // Badges 3D
                 const badgesHtml = badges.map(badge => \`
-                    <div class="badge badge-\${badge.color} \${!badge.unlocked ? 'opacity-50' : ''}">
+                    <div class="badge-3d badge-3d-\${badge.unlocked ? badge.color : 'locked'}">
                         <i class="fas fa-\${badge.icon} mr-1"></i>
                         \${badge.name}
                     </div>
@@ -710,7 +1276,7 @@ studentDashboardRoutes.get('/', (c) => {
 
                 // Upcoming workouts
                 const upcomingHtml = workouts.slice(1, 4).map(w => \`
-                    <div class="card-dark p-4 rounded-lg mb-3">
+                    <div class="glass p-4 rounded-lg hover:border-green-500 transition">
                         <div class="font-bold">\${w.title}</div>
                         <div class="text-sm text-gray-400 mt-1">\${w.description || 'Sem descrição'}</div>
                     </div>
@@ -719,31 +1285,29 @@ studentDashboardRoutes.get('/', (c) => {
             }
 
             function renderAnalytics() {
-                // Consistency Chart
+                // Consistency Chart with Rounded Bars
                 const ctx1 = document.getElementById('consistencyChart');
                 const container = document.getElementById('consistencyChartContainer');
                 const emptyState = document.getElementById('consistencyEmptyState');
                 
-                // Calculate actual weekly workouts data
                 const today = new Date();
-                const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                const dayOfWeek = today.getDay();
                 const weekStart = new Date(today);
-                weekStart.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Get Monday
+                weekStart.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
                 
-                const weeklyData = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+                const weeklyData = [0, 0, 0, 0, 0, 0, 0];
                 
                 workouts.forEach(workout => {
                     const workoutDate = new Date(workout.created_at * 1000);
                     if (workoutDate >= weekStart && workoutDate <= today) {
                         const day = workoutDate.getDay();
-                        const index = day === 0 ? 6 : day - 1; // Convert to Mon=0, Sun=6
+                        const index = day === 0 ? 6 : day - 1;
                         weeklyData[index]++;
                     }
                 });
                 
                 const totalWorkouts = weeklyData.reduce((a, b) => a + b, 0);
                 
-                // Show empty state if no workouts this week
                 if (totalWorkouts === 0) {
                     container.classList.add('hidden');
                     emptyState.classList.remove('hidden');
@@ -756,88 +1320,106 @@ studentDashboardRoutes.get('/', (c) => {
                         data: {
                             labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
                             datasets: [{
-                                label: 'Treinos Realizados',
+                                label: 'Treinos',
                                 data: weeklyData,
-                                backgroundColor: '#00FF88',
-                                borderRadius: 6,
-                                barThickness: 40,
-                                maxBarThickness: 50
+                                backgroundColor: function(context) {
+                                    const value = context.parsed.y;
+                                    return value > 0 ? 'rgba(204, 255, 0, 0.8)' : 'rgba(42, 42, 42, 0.5)';
+                                },
+                                borderRadius: 8,
+                                barThickness: 40
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            layout: {
-                                padding: {
-                                    top: 20,
-                                    bottom: 10
-                                }
-                            },
+                            layout: { padding: { top: 20, bottom: 10 } },
                             scales: {
                                 y: { 
                                     beginAtZero: true,
                                     max: Math.max(...weeklyData) + 1,
-                                    ticks: { 
-                                        color: '#999',
-                                        stepSize: 1,
-                                        font: {
-                                            size: 12
-                                        }
-                                    },
-                                    grid: { 
-                                        color: '#333',
-                                        drawBorder: false
-                                    }
+                                    ticks: { color: '#999', stepSize: 1 },
+                                    grid: { color: '#333' }
                                 },
                                 x: { 
-                                    ticks: { 
-                                        color: '#CCC',
-                                        font: {
-                                            size: 13,
-                                            weight: '500'
-                                        }
-                                    },
-                                    grid: { 
-                                        display: false
-                                    }
+                                    ticks: { color: '#CCC', font: { size: 13, weight: '500' } },
+                                    grid: { display: false }
                                 }
                             },
                             plugins: { 
-                                legend: { 
-                                    display: false
-                                },
+                                legend: { display: false },
                                 tooltip: {
                                     backgroundColor: '#1A1A1A',
-                                    titleColor: '#FFF',
-                                    bodyColor: '#CCC',
-                                    borderColor: '#00FF88',
-                                    borderWidth: 1,
-                                    padding: 12,
-                                    displayColors: false,
-                                    callbacks: {
-                                        label: function(context) {
-                                            const value = context.parsed.y;
-                                            return value === 1 ? '1 treino' : value + ' treinos';
-                                        }
-                                    }
+                                    borderColor: '#CCFF00',
+                                    borderWidth: 1
                                 }
                             }
                         }
                     });
                 }
 
-                // Volume Chart
+                // Timeline de Transformação
+                if (photos.length >= 2 && measurements.length >= 2) {
+                    const firstPhoto = photos[photos.length - 1];
+                    const lastPhoto = photos[0];
+                    const firstMeasure = measurements[measurements.length - 1];
+                    const lastMeasure = measurements[0];
+                    
+                    const weightChange = (lastMeasure.weight - firstMeasure.weight).toFixed(1);
+                    const bfChange = (lastMeasure.body_fat_percentage - firstMeasure.body_fat_percentage).toFixed(1);
+                    
+                    document.getElementById('transformationTimeline').innerHTML = \`
+                        <div class="before-after-container">
+                            <div class="photo-comparison">
+                                <img src="\${firstPhoto.photo_url}" alt="Antes">
+                                <div class="photo-label">
+                                    Antes<br>
+                                    <span style="font-size: 0.9rem; font-weight: 400;">\${firstMeasure.weight}kg | \${firstMeasure.body_fat_percentage}% BF</span>
+                                </div>
+                            </div>
+                            <div class="photo-comparison">
+                                <img src="\${lastPhoto.photo_url}" alt="Depois">
+                                <div class="photo-label">
+                                    Depois<br>
+                                    <span style="font-size: 0.9rem; font-weight: 400;">\${lastMeasure.weight}kg | \${lastMeasure.body_fat_percentage}% BF</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-change">
+                            <div class="stat-change-item">
+                                <div class="stat-change-value \${weightChange < 0 ? 'positive' : ''}">\${weightChange > 0 ? '+' : ''}\${weightChange}kg</div>
+                                <div class="text-sm text-gray-400">Peso</div>
+                            </div>
+                            <div class="stat-change-item">
+                                <div class="stat-change-value \${bfChange < 0 ? 'positive' : ''}">\${bfChange > 0 ? '+' : ''}\${bfChange}%</div>
+                                <div class="text-sm text-gray-400">Gordura</div>
+                            </div>
+                        </div>
+                    \`;
+                } else {
+                    document.getElementById('transformationTimeline').innerHTML = \`
+                        <p class="text-gray-400 text-center py-4">Adicione mais fotos e medições para ver sua transformação</p>
+                    \`;
+                }
+
+                // Volume Chart (mock)
                 const ctx2 = document.getElementById('volumeChart');
                 new Chart(ctx2, {
                     type: 'line',
                     data: {
                         labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
                         datasets: [{
-                            label: 'Volume Total (kg)',
+                            label: 'Volume (kg)',
                             data: [1000, 1150, 1200, 1250],
                             borderColor: '#00D4FF',
-                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
-                            tension: 0.3
+                            backgroundColor: 'rgba(0, 212, 255, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#00D4FF',
+                            pointBorderColor: '#0D0D0D',
+                            pointBorderWidth: 2
                         }]
                     },
                     options: {
@@ -866,8 +1448,14 @@ studentDashboardRoutes.get('/', (c) => {
                                 label: 'Peso (kg)',
                                 data: weightData,
                                 borderColor: '#FF6B35',
-                                backgroundColor: 'rgba(255, 107, 53, 0.1)',
-                                tension: 0.3
+                                backgroundColor: 'rgba(255, 107, 53, 0.2)',
+                                tension: 0.4,
+                                fill: true,
+                                borderWidth: 3,
+                                pointRadius: 6,
+                                pointBackgroundColor: '#FF6B35',
+                                pointBorderColor: '#0D0D0D',
+                                pointBorderWidth: 2
                             }]
                         },
                         options: {
@@ -881,86 +1469,84 @@ studentDashboardRoutes.get('/', (c) => {
                         }
                     });
                 }
-
-                // Progress Photos
-                if (photos.length > 0) {
-                    const photosHtml = photos.slice(0, 4).map(photo => \`
-                        <div class="aspect-square rounded-lg overflow-hidden">
-                            <img src="\${photo.photo_url}" alt="Progresso" class="w-full h-full object-cover">
-                        </div>
-                    \`).join('');
-                    document.getElementById('progressPhotos').innerHTML = photosHtml;
-                } else {
-                    document.getElementById('progressPhotos').innerHTML = '<p class="text-gray-400 text-center col-span-2 py-4">Nenhuma foto ainda</p>';
-                }
             }
 
             function renderNotifications() {
-                // Personal messages (mock)
+                // Personal messages
                 document.getElementById('personalMessages').innerHTML = \`
-                    <div class="card-dark p-4 rounded-lg mb-3">
+                    <div class="notification-card personal">
                         <div class="flex items-start gap-3">
-                            <i class="fas fa-user-circle text-3xl" style="color: #00FF88;"></i>
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #00FF88, #00D4FF); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0D0D0D;">PT</div>
                             <div class="flex-1">
-                                <div class="font-bold">Personal Trainer</div>
-                                <div class="text-sm text-gray-400 mt-1">Ótimo trabalho essa semana! Continue assim 💪</div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fas fa-comment text-green-500"></i>
+                                    <span class="font-bold">Personal Trainer</span>
+                                </div>
+                                <div class="text-sm text-gray-300 mt-1">Ótimo trabalho essa semana! Continue assim 💪</div>
                                 <div class="text-xs text-gray-500 mt-2">Há 2 horas</div>
                             </div>
                         </div>
                     </div>
                 \`;
 
-                // System alerts (mock)
+                // System alerts
                 document.getElementById('systemAlerts').innerHTML = \`
-                    <div class="card-dark p-4 rounded-lg mb-3 border-l-4 border-yellow-500">
+                    <div class="notification-card system">
                         <div class="flex items-start gap-3">
                             <i class="fas fa-exclamation-triangle text-2xl text-yellow-500"></i>
                             <div class="flex-1">
                                 <div class="font-bold">Avaliação Física</div>
-                                <div class="text-sm text-gray-400 mt-1">Sua reavaliação vence em 5 dias</div>
+                                <div class="text-sm text-gray-300 mt-1">Sua reavaliação vence em 5 dias</div>
                             </div>
+                        </div>
+                    </div>
+                \`;
+
+                // Reminders
+                document.getElementById('reminders').innerHTML = \`
+                    <div class="notification-card reminder">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-tint text-2xl text-blue-500"></i>
+                            <div class="flex-1">
+                                <div class="font-semibold">Hidratação</div>
+                                <div class="text-sm text-gray-400">Beba água a cada 30 minutos</div>
+                            </div>
+                            <input type="checkbox" class="w-5 h-5">
                         </div>
                     </div>
                 \`;
             }
 
             function renderProfile() {
-                // Subscription (mock)
+                // Subscription
                 const nextMonth = new Date();
                 nextMonth.setMonth(nextMonth.getMonth() + 1);
                 document.getElementById('nextRenewal').textContent = nextMonth.toLocaleDateString('pt-BR');
                 document.getElementById('personalName').textContent = 'André Silva';
+                document.getElementById('memberSince').textContent = new Date(studentData.created_at * 1000).toLocaleDateString('pt-BR');
 
-                // Recovery library (mock)
-                document.getElementById('recoveryLibrary').innerHTML = \`
-                    <div class="card-dark p-4 rounded-lg cursor-pointer hover:border hover:border-blue-500 transition">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-play-circle text-2xl" style="color: #00D4FF;"></i>
-                            <div class="flex-1">
-                                <div class="font-semibold">Alongamento para Pernas</div>
-                                <div class="text-xs text-gray-400">5 minutos</div>
+                // Recovery library - Netflix Style
+                const recoveryVideos = [
+                    { title: 'Alongamento Pernas', duration: '5 min', thumb: 'legs' },
+                    { title: 'Mobilidade Ombros', duration: '7 min', thumb: 'shoulders' },
+                    { title: 'Relaxamento Lombar', duration: '10 min', thumb: 'back' },
+                    { title: 'Yoga Básico', duration: '15 min', thumb: 'yoga' }
+                ];
+                
+                document.getElementById('recoveryLibrary').innerHTML = recoveryVideos.map(video => \`
+                    <div class="recovery-video-card">
+                        <div class="recovery-video-thumb" style="background: linear-gradient(135deg, #2A2A2A 0%, #1A1A1A 100%);"></div>
+                        <div class="recovery-play-overlay">
+                            <div class="recovery-play-icon">
+                                <i class="fas fa-play"></i>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-dark p-4 rounded-lg cursor-pointer hover:border hover:border-blue-500 transition">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-play-circle text-2xl" style="color: #00D4FF;"></i>
-                            <div class="flex-1">
-                                <div class="font-semibold">Mobilidade de Ombros</div>
-                                <div class="text-xs text-gray-400">7 minutos</div>
-                            </div>
+                        <div class="recovery-video-info">
+                            <div class="recovery-video-title">\${video.title}</div>
+                            <div class="recovery-video-duration">\${video.duration}</div>
                         </div>
                     </div>
-                    <div class="card-dark p-4 rounded-lg cursor-pointer hover:border hover:border-blue-500 transition">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-play-circle text-2xl" style="color: #00D4FF;"></i>
-                            <div class="flex-1">
-                                <div class="font-semibold">Relaxamento Lombar</div>
-                                <div class="text-xs text-gray-400">10 minutos</div>
-                            </div>
-                        </div>
-                    </div>
-                \`;
+                \`).join('');
 
                 // Personal info
                 document.getElementById('personalInfo').innerHTML = \`
@@ -971,7 +1557,7 @@ studentDashboardRoutes.get('/', (c) => {
                         </div>
                         <div class="flex justify-between py-2 border-b border-gray-700">
                             <span class="text-gray-400">Telefone</span>
-                            <span>\${studentData.phone || 'Não informado'}</span>
+                            <span>\${studentData.whatsapp || 'Não informado'}</span>
                         </div>
                         <div class="flex justify-between py-2">
                             <span class="text-gray-400">Membro desde</span>
@@ -983,13 +1569,11 @@ studentDashboardRoutes.get('/', (c) => {
 
             // Section switching
             function switchSection(section) {
-                // Hide all sections
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.nav-item-elite').forEach(n => n.classList.remove('active'));
 
-                // Show selected section
                 document.getElementById(\`section-\${section}\`).classList.add('active');
-                event.target.closest('.nav-item').classList.add('active');
+                event.target.closest('.nav-item-elite').classList.add('active');
             }
 
             // Workout Modal
@@ -1001,7 +1585,7 @@ studentDashboardRoutes.get('/', (c) => {
                 
                 const exercises = workout.exercises ? JSON.parse(workout.exercises) : [];
                 const exercisesHtml = exercises.map((ex, idx) => \`
-                    <div class="exercise-item">
+                    <div style="background: #0D0D0D; border: 1px solid #333; padding: 1rem; margin-bottom: 0.5rem; border-radius: 0.5rem;">
                         <div class="flex justify-between items-start mb-2">
                             <div class="flex-1">
                                 <div class="font-bold">\${idx + 1}. \${ex.name || ex.exercise}</div>
@@ -1009,9 +1593,7 @@ studentDashboardRoutes.get('/', (c) => {
                             </div>
                             <input type="checkbox" class="w-6 h-6" onchange="checkExerciseComplete()">
                         </div>
-                        <div class="text-xs text-gray-500">
-                            Descanso: \${ex.rest || '60'}s
-                        </div>
+                        <div class="text-xs text-gray-500">Descanso: \${ex.rest || '60'}s</div>
                     </div>
                 \`).join('');
 
@@ -1053,9 +1635,7 @@ studentDashboardRoutes.get('/', (c) => {
             }
 
             function checkExerciseComplete() {
-                // Start rest timer when exercise is checked
-                const restTime = 60; // seconds
-                startRestTimer(restTime);
+                startRestTimer(60);
             }
 
             function startRestTimer(seconds) {
@@ -1074,7 +1654,6 @@ studentDashboardRoutes.get('/', (c) => {
                     if (restTimeRemaining <= 0) {
                         clearInterval(restTimer);
                         document.getElementById('restTimer').classList.add('hidden');
-                        // Play sound (optional)
                         playBeep();
                     }
                 }, 1000);
@@ -1089,7 +1668,6 @@ studentDashboardRoutes.get('/', (c) => {
             }
 
             function playBeep() {
-                // Simple beep using Web Audio API
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -1111,7 +1689,6 @@ studentDashboardRoutes.get('/', (c) => {
                 if (confirm('Deseja finalizar o treino?')) {
                     alert('Treino concluído! Parabéns 🎉');
                     closeWorkoutModal();
-                    // Reload data
                     init();
                 }
             }
@@ -1155,7 +1732,6 @@ studentDashboardRoutes.get('/', (c) => {
                 };
 
                 try {
-                    // TODO: Save to API
                     alert('Check-in registrado! Seu Personal foi notificado.');
                     closeBodyMapModal();
                 } catch (error) {
