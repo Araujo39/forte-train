@@ -2,7 +2,7 @@
 
 ![ForteTrain Logo](https://img.shields.io/badge/ForteTrain-IA-CCFF00?style=for-the-badge&logo=dumbbell)
 ![Status](https://img.shields.io/badge/Status-MVP-success?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-5.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-7.0-blue?style=for-the-badge)
 
 ## 🚀 Visão Geral
 
@@ -17,6 +17,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 - **Multi-Tenant Seguro**: Arquitetura multi-tenant com isolamento total de dados
 - **🆕 Super Admin Dashboard**: Visão macro do negócio com métricas financeiras (MRR/ARR), health score e impersonation
 - **🆕 Student Details Page**: Página completa de detalhes do aluno com fotos de progresso, medições corporais e metas
+- **✨ Elite UI/UX 'Carbon Performance'**: Student Dashboard refatorado com glassmorphism, gradientes neon, badges 3D metálicos e Timeline de Transformação
 
 ## 🌐 URLs do Projeto
 
@@ -47,7 +48,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/dashboard/notifications` | **Sistema de Notificações WhatsApp** |
 | `/dashboard/settings` | **Configurações e API Keys** |
 | `/student/app` | **WebApp do Aluno (Player de Treino + Vision)** |
-| **🆕 `/admin`** | **Super Admin Dashboard (Business View)** |
+| **✨ `/student/dashboard`** | **Elite Student Dashboard (Carbon Performance Design)** |
 | **🆕 `/dashboard/student/:id`** | **Página de Detalhes do Aluno (Fotos, Medições, Metas)** |
 | `/api/auth/login` | API de autenticação |
 | `/api/dashboard/stats` | Estatísticas do dashboard |
@@ -503,4 +504,147 @@ Copyright © 2026 ForteTrain. Todos os direitos reservados.
    ```bash
    npx wrangler pages domain add fortetrain.com --project-name fortetrain
    ```
+
+
+## ✨ Elite UI/UX v7.0 - "Carbon Performance"
+
+### 🎨 Design System
+
+**Fontes**:
+- **Inter**: Interface principal (300-900)
+- **Space Grotesk**: Headlines e títulos (300-700)
+
+**Paleta de Cores**:
+- **Ultra Dark**: `#0D0D0D` (background)
+- **Neon Green Gradient**: `#CCFF00 → #99FF00` (CTAs principais)
+- **Electric Blue**: `#00D4FF` (métricas de progresso)
+- **Fire Gradient**: `#FF6B35 → #FF4757` (streak e alertas)
+- **Warning Yellow**: `#FFCC00` (injury check-in)
+
+### 📱 Student Dashboard - Carbon Performance
+
+#### **Header Elite**
+- ✨ **Saudação Dinâmica**: Muda com base no horário
+  - 05h-12h: "Bom dia ☀️"
+  - 12h-18h: "Boa tarde 🔥"
+  - 18h-22h: "Hustle Mode: ON 💪"
+  - 22h-05h: "Modo Noturno 🌙"
+- 🔥 **Flame Counter**: Badge com pulse animation e fire flicker
+- 👤 **Profile Photo**: Círculo com iniciais e gradient neon
+- 🚪 **Logout**: Ícone minimalista
+
+#### **Bottom Navigation - Glassmorphism**
+- 🌫️ **Backdrop Blur**: 30px com transparência 85%
+- 💫 **Active Glow**: Drop-shadow neon com pulse animation
+- 📍 **4 Seções**: Início, Evolução, Avisos, Perfil
+
+#### **Seção 1: Início**
+
+**Stat Cards com Glassmorphism**:
+1. **Treinos/Sem**: Donut chart (75% cutout) com dados reais
+2. **kg Total**: Weight-plate icon com rotação 360° (8s loop)
+3. **Peso Atual**: Heartbeat icon com última medição
+
+**Treino do Dia - Neon Border Animado**:
+- 🎨 **Animated Gradient Border**: 4 cores rotativas (4s loop)
+- 🎯 **Botão Maior**: `1.5rem` padding, gradient background, hollow play icon
+- 📊 **Stats**: Número de exercícios + duração estimada
+
+**Badges 3D Metálicos**:
+- 🥇 **Gold**: Gradient `#FFD700 → #FFA500` + box-shadow + shimmer
+- 🥈 **Silver**: Gradient `#E8E8E8 → #A0A0A0` + inset highlight
+- 🥉 **Bronze**: Gradient `#CD7F32 → #8B4513` + warm glow
+- 🔒 **Locked**: Grayscale com opacity 50%
+- ✨ **Shimmer Animation**: Diagonal white gradient (3s loop)
+
+#### **Seção 2: Evolução**
+
+**Consistência Semanal**:
+- 📊 **Rounded Bars**: Radius 8px, green para treinos realizados, gray para dias sem treino
+- 📈 **Dynamic Y-axis**: Auto-scale baseado no máximo
+- 🎯 **Empty State**: Mensagem motivacional + botão "Iniciar Treino"
+
+**Timeline de Transformação**:
+- 📸 **Before/After Photos**: Side-by-side com labels
+- 📉 **Stats Change**: Weight e Body Fat com cores positivas/negativas
+- 🎨 **Gradient Labels**: Overlay com blur background
+
+**Gráficos de Volume e Peso**:
+- 💧 **Area Fill**: Semi-transparente abaixo da linha
+- 🎯 **Point Highlights**: Radius 6px com border
+- 📊 **Smooth Curves**: Tension 0.4 para transições suaves
+
+#### **Seção 3: Notificações**
+
+**Visual Categories**:
+- 💚 **Personal**: Border-left verde + trainer photo circular
+- ⚠️ **System**: Border-left laranja + triangle icon
+- 💧 **Reminder**: Border-left azul + specific icon
+
+**Mark All Read Button**:
+- 🎨 Background `rgba(204, 255, 0, 0.1)` com border neon
+- ✅ Double-check icon
+
+#### **Seção 4: Perfil**
+
+**Profile Header**:
+- 👤 **Large Photo**: 120px circular com gradient background
+- 📅 **Member Since**: Data de cadastro
+
+**Subscription Badge**:
+- ✅ **Active**: Green-blue gradient com pulse animation (2s loop)
+- ❌ **Expired**: Red solid com static shadow
+
+**Injury Check-in - Yellow Warning**:
+- ⚠️ **Button**: `#FFCC00` background, hover lift 3px
+- 📝 **Text**: "Relatar Desconforto/Dor antes de Treinar"
+- 🗺️ **Body Map**: SVG interativo com 16 regiões
+
+**Recovery Library - Netflix Style**:
+- 🎬 **Video Grid**: Auto-fill 160px cards
+- ▶️ **Play Overlay**: Circular button com neon background
+- 📹 **Video Info**: Gradient overlay bottom com title + duration
+- 🎯 **Hover Effect**: Scale 1.05 + neon shadow
+
+#### **Workout Player Modal**
+
+**Vision IA Integration**:
+- 📷 **Botão dentro do Player**: Blue button no header do modal
+- 🎯 **Acesso rápido**: Durante execução do treino
+
+**Timer & Controls**:
+- ⏱️ **Display**: 3rem Courier New monospace, neon green
+- 🎮 **Buttons**: Gradient start, blue pause, red finish
+
+**Rest Timer**:
+- 🟠 **Full-width bar**: Fixed bottom-20, orange background
+- ⏰ **Countdown**: 4xl bold display
+- ⏭️ **Skip Button**: White text on orange
+
+### 🎯 Diferenças vs v6.0
+
+| Feature | v6.0 | v7.0 Elite |
+|---------|------|------------|
+| Header | Static greeting | Dynamic time-based greeting |
+| Bottom Nav | Solid dark | Glassmorphism + glow |
+| Stat Cards | Gradient background | Glassmorphism + donut chart |
+| Treino Card | Left border | Animated neon border |
+| Badges | Flat gradients | 3D metallic + shimmer |
+| Charts | Basic bars | Rounded bars + empty state |
+| Timeline | - | Before/After photos + stats |
+| Notifications | Plain list | List cards + categories |
+| Profile Button | Green | Yellow warning |
+| Recovery Library | List | Netflix grid |
+| Vision IA | Separate button | Inside player modal |
+| Fonts | System | Inter + Space Grotesk |
+| Build Size | 461 KB | 488.60 KB (+27 KB) |
+
+### 📊 Métricas de Performance
+
+- **Animations**: 12 tipos (pulse, glow, shimmer, rotate, flicker, fade)
+- **Glassmorphism**: 3 níveis (light, strong, nav)
+- **Gradients**: 8 combinações (neon, fire, blue, metallic)
+- **Charts**: 3 tipos (donut, bar, line) com customização avançada
+- **Responsive**: Mobile-first com breakpoints 640px
+- **Build Time**: ~3.6s (Vite SSR bundle)
 
