@@ -1580,7 +1580,7 @@ apiRoutes.get('/students/:id/photos', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
 
@@ -1607,7 +1607,7 @@ apiRoutes.post('/students/:id/photos', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
     
@@ -1646,7 +1646,7 @@ apiRoutes.get('/students/:id/measurements', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
 
@@ -1673,7 +1673,7 @@ apiRoutes.post('/students/:id/measurements', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
     
@@ -1721,7 +1721,7 @@ apiRoutes.get('/students/:id/goals', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
 
@@ -1748,7 +1748,7 @@ apiRoutes.post('/students/:id/goals', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
     
@@ -1776,6 +1776,53 @@ apiRoutes.post('/students/:id/goals', async (c) => {
   }
 })
 
+// Get student by ID
+apiRoutes.get('/students/:id', async (c) => {
+  try {
+    const { env } = c
+    const token = c.req.header('Authorization')?.replace('Bearer ', '')
+    
+    if (!token) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const payload = await verify(token, env.JWT_SECRET)
+    const studentId = c.req.param('id')
+
+    // For students, they can only access their own data
+    if (payload.role === 'student' && payload.studentId !== studentId) {
+      return c.json({ error: 'Forbidden' }, 403)
+    }
+
+    // For personal trainers, check tenant_id
+    const tenantId = payload.tenantId
+
+    let student
+    if (tenantId) {
+      student = await env.DB.prepare(`
+        SELECT * FROM students 
+        WHERE id = ? AND tenant_id = ?
+        LIMIT 1
+      `).bind(studentId, tenantId).first()
+    } else {
+      student = await env.DB.prepare(`
+        SELECT * FROM students 
+        WHERE id = ?
+        LIMIT 1
+      `).bind(studentId).first()
+    }
+
+    if (!student) {
+      return c.json({ error: 'Student not found' }, 404)
+    }
+
+    return c.json(student)
+  } catch (error) {
+    console.error('Get student error:', error)
+    return c.json({ error: 'Failed to get student' }, 500)
+  }
+})
+
 // Get student workouts
 apiRoutes.get('/students/:id/workouts', async (c) => {
   try {
@@ -1786,7 +1833,7 @@ apiRoutes.get('/students/:id/workouts', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const payload = await verifyToken(token, env.JWT_SECRET)
+    const payload = await verify(token, env.JWT_SECRET)
     const tenantId = payload.tenantId
     const studentId = c.req.param('id')
 

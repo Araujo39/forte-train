@@ -576,7 +576,8 @@ studentDashboardRoutes.get('/', (c) => {
                     const studentRes = await axios.get(\`/api/students/\${studentId}\`);
                     studentData = studentRes.data;
                     
-                    document.getElementById('studentName').textContent = studentData.full_name.split(' ')[0];
+                    const firstName = studentData.full_name ? studentData.full_name.split(' ')[0] : 'Aluno';
+                    document.getElementById('studentName').textContent = firstName;
                     
                     // Load all data
                     await Promise.all([
