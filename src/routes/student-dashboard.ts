@@ -257,7 +257,17 @@ studentDashboardRoutes.get('/', (c) => {
                 <!-- Consistency Chart -->
                 <div class="card-dark p-6 rounded-xl mb-6">
                     <h3 class="text-lg font-bold mb-4">Consistência Semanal</h3>
-                    <canvas id="consistencyChart" height="200"></canvas>
+                    <div id="consistencyChartContainer" style="height: 300px; position: relative;">
+                        <canvas id="consistencyChart"></canvas>
+                    </div>
+                    <div id="consistencyEmptyState" class="hidden text-center py-8">
+                        <i class="fas fa-calendar-times text-5xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400 mb-4">Você ainda não registrou treinos esta semana.<br>Comece hoje!</p>
+                        <button onclick="switchSection('home'); scrollTo(0,0);" class="btn-green-neon px-6 py-3 rounded-lg inline-flex items-center">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar Treino
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Volume Chart -->
@@ -711,26 +721,110 @@ studentDashboardRoutes.get('/', (c) => {
             function renderAnalytics() {
                 // Consistency Chart
                 const ctx1 = document.getElementById('consistencyChart');
-                new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Treinos Realizados',
-                            data: [1, 1, 0, 1, 1, 1, 0],
-                            backgroundColor: '#00FF88'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true, ticks: { color: '#999' }, grid: { color: '#333' } },
-                            x: { ticks: { color: '#999' }, grid: { color: '#333' } }
-                        },
-                        plugins: { legend: { labels: { color: '#FFF' } } }
+                const container = document.getElementById('consistencyChartContainer');
+                const emptyState = document.getElementById('consistencyEmptyState');
+                
+                // Calculate actual weekly workouts data
+                const today = new Date();
+                const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Get Monday
+                
+                const weeklyData = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+                
+                workouts.forEach(workout => {
+                    const workoutDate = new Date(workout.created_at * 1000);
+                    if (workoutDate >= weekStart && workoutDate <= today) {
+                        const day = workoutDate.getDay();
+                        const index = day === 0 ? 6 : day - 1; // Convert to Mon=0, Sun=6
+                        weeklyData[index]++;
                     }
                 });
+                
+                const totalWorkouts = weeklyData.reduce((a, b) => a + b, 0);
+                
+                // Show empty state if no workouts this week
+                if (totalWorkouts === 0) {
+                    container.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                } else {
+                    container.classList.remove('hidden');
+                    emptyState.classList.add('hidden');
+                    
+                    new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                            datasets: [{
+                                label: 'Treinos Realizados',
+                                data: weeklyData,
+                                backgroundColor: '#00FF88',
+                                borderRadius: 6,
+                                barThickness: 40,
+                                maxBarThickness: 50
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    top: 20,
+                                    bottom: 10
+                                }
+                            },
+                            scales: {
+                                y: { 
+                                    beginAtZero: true,
+                                    max: Math.max(...weeklyData) + 1,
+                                    ticks: { 
+                                        color: '#999',
+                                        stepSize: 1,
+                                        font: {
+                                            size: 12
+                                        }
+                                    },
+                                    grid: { 
+                                        color: '#333',
+                                        drawBorder: false
+                                    }
+                                },
+                                x: { 
+                                    ticks: { 
+                                        color: '#CCC',
+                                        font: {
+                                            size: 13,
+                                            weight: '500'
+                                        }
+                                    },
+                                    grid: { 
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: { 
+                                legend: { 
+                                    display: false
+                                },
+                                tooltip: {
+                                    backgroundColor: '#1A1A1A',
+                                    titleColor: '#FFF',
+                                    bodyColor: '#CCC',
+                                    borderColor: '#00FF88',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    displayColors: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.parsed.y;
+                                            return value === 1 ? '1 treino' : value + ' treinos';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
 
                 // Volume Chart
                 const ctx2 = document.getElementById('volumeChart');
