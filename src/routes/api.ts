@@ -307,6 +307,52 @@ apiRoutes.post('/students', async (c) => {
   }
 })
 
+// OMNI-SPORT: Update student primary sport
+apiRoutes.patch('/students/:id/sport', async (c) => {
+  try {
+    const auth = c.req.header('Authorization')
+    if (!auth) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    const token = auth.replace('Bearer ', '')
+    const payload = await verify(token, c.env.JWT_SECRET)
+    const tenantId = payload.tenantId
+    const studentId = c.req.param('id')
+
+    const { primary_sport } = await c.req.json()
+
+    if (!primary_sport) {
+      return c.json({ error: 'primary_sport is required' }, 400)
+    }
+
+    // Validate sport exists
+    const sportConfig = await c.env.DB.prepare(
+      'SELECT sport_type FROM sport_configs WHERE sport_type = ?'
+    ).bind(primary_sport).first()
+
+    if (!sportConfig) {
+      return c.json({ error: 'Invalid sport type' }, 400)
+    }
+
+    // Update student
+    await c.env.DB.prepare(`
+      UPDATE students 
+      SET primary_sport = ?
+      WHERE id = ? AND tenant_id = ?
+    `).bind(primary_sport, studentId, tenantId).run()
+
+    return c.json({ 
+      success: true, 
+      message: 'Primary sport updated',
+      primary_sport 
+    })
+  } catch (error) {
+    console.error('Update primary sport error:', error)
+    return c.json({ error: 'Failed to update primary sport' }, 500)
+  }
+})
+
 // ==================== AI WORKOUT GENERATOR ====================
 
 // ==================== OMNI-SPORT AI GENERATOR ====================

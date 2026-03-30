@@ -855,6 +855,10 @@ studentDashboardRoutes.get('/', (c) => {
                 <div class="profile-header">
                     <div class="profile-photo-large" id="profilePhotoLarge">JD</div>
                     <h2 class="text-2xl font-bold mb-1" id="profileFullName">João Doe</h2>
+                    <!-- Sport Badge Dinâmico -->
+                    <div id="sportBadgeContainer" class="mt-3 mb-2">
+                        <!-- Will be populated by applySportTheme() -->
+                    </div>
                     <p class="member-since">Membro desde <span id="memberSince">01/01/2024</span></p>
                 </div>
 
@@ -1164,6 +1168,29 @@ studentDashboardRoutes.get('/', (c) => {
                 activeBadges.forEach(badge => {
                     badge.style.filter = 'drop-shadow(0 0 20px ' + theme.glowColor + ')';
                 });
+                
+                // 🏆 OMNI-SPORT: Create and inject Sport Badge
+                const badgeContainer = document.getElementById('sportBadgeContainer');
+                if (badgeContainer) {
+                    badgeContainer.innerHTML = \`
+                        <div class="sport-badge-profile" style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 8px 16px;
+                            background: \${theme.gradient};
+                            border-radius: 12px;
+                            font-weight: 600;
+                            font-size: 0.875rem;
+                            letter-spacing: 0.5px;
+                            box-shadow: 0 0 20px \${theme.glowColor};
+                            animation: pulse 2s infinite;
+                        ">
+                            <i class="fas \${theme.icon}"></i>
+                            <span>\${theme.name}</span>
+                        </div>
+                    \`;
+                }
             }
 
             // Initialize
@@ -1257,6 +1284,18 @@ studentDashboardRoutes.get('/', (c) => {
             }
 
             function renderHome() {
+                // 🏆 OMNI-SPORT: Get current sport theme
+                const primarySport = studentData?.primary_sport || 'bodybuilding';
+                const sportTheme = SPORT_THEMES[primarySport] || SPORT_THEMES.bodybuilding;
+                
+                // Update "Treino de Hoje" section title icon
+                const todayTitleIcon = document.querySelector('#section-home h2 i.fa-dumbbell');
+                if (todayTitleIcon) {
+                    todayTitleIcon.className = 'fas ' + sportTheme.icon + ' mr-2 neon-gradient-text';
+                    todayTitleIcon.style.color = sportTheme.primaryColor;
+                    todayTitleIcon.style.filter = 'drop-shadow(0 0 10px ' + sportTheme.glowColor + ')';
+                }
+                
                 // Stats
                 const thisWeekWorkouts = workouts.filter(w => {
                     const workoutDate = new Date(w.created_at * 1000);
@@ -1282,7 +1321,7 @@ studentDashboardRoutes.get('/', (c) => {
                     data: {
                         datasets: [{
                             data: [thisWeekWorkouts, 7 - thisWeekWorkouts],
-                            backgroundColor: ['#CCFF00', '#2A2A2A'],
+                            backgroundColor: [sportTheme.primaryColor, '#2A2A2A'],
                             borderWidth: 0
                         }]
                     },
@@ -1298,9 +1337,16 @@ studentDashboardRoutes.get('/', (c) => {
                 const todayWorkout = workouts[0];
                 
                 if (todayWorkout) {
+                    // 🏆 OMNI-SPORT: Get sport theme for workout card
+                    const workoutSport = todayWorkout.sport_type || 'bodybuilding';
+                    const sportTheme = SPORT_THEMES[workoutSport] || SPORT_THEMES.bodybuilding;
+                    
                     document.getElementById('todayWorkout').innerHTML = \`
                         <div class="mb-4">
-                            <h3 class="text-2xl font-bold mb-2">\${todayWorkout.title}</h3>
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas \${sportTheme.icon} text-2xl" style="color: \${sportTheme.primaryColor}; filter: drop-shadow(0 0 10px \${sportTheme.glowColor});"></i>
+                                <h3 class="text-2xl font-bold">\${todayWorkout.title}</h3>
+                            </div>
                             <p class="text-gray-400">\${todayWorkout.description || ''}</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4 mb-6">
@@ -1309,11 +1355,11 @@ studentDashboardRoutes.get('/', (c) => {
                                 <div class="text-sm text-gray-400">Exercícios</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-3xl font-bold" style="color: #00D4FF;">45min</div>
+                                <div class="text-3xl font-bold" style="color: \${sportTheme.primaryColor};">45min</div>
                                 <div class="text-sm text-gray-400">Duração</div>
                             </div>
                         </div>
-                        <button onclick="openWorkoutModal('\${todayWorkout.id}')" class="btn-start-workout w-full">
+                        <button onclick="openWorkoutModal('\${todayWorkout.id}')" class="btn-start-workout w-full" style="background: \${sportTheme.gradient}; box-shadow: 0 0 30px \${sportTheme.glowColor};">
                             <div class="play-icon-hollow"></div>
                             Iniciar Treino
                         </button>
@@ -1348,6 +1394,10 @@ studentDashboardRoutes.get('/', (c) => {
             }
 
             function renderAnalytics() {
+                // 🏆 OMNI-SPORT: Get current sport theme for charts
+                const primarySport = studentData?.primary_sport || 'bodybuilding';
+                const sportTheme = SPORT_THEMES[primarySport] || SPORT_THEMES.bodybuilding;
+                
                 // Consistency Chart with Rounded Bars
                 const ctx1 = document.getElementById('consistencyChart');
                 const container = document.getElementById('consistencyChartContainer');
@@ -1387,7 +1437,7 @@ studentDashboardRoutes.get('/', (c) => {
                                 data: weeklyData,
                                 backgroundColor: function(context) {
                                     const value = context.parsed.y;
-                                    return value > 0 ? 'rgba(204, 255, 0, 0.8)' : 'rgba(42, 42, 42, 0.5)';
+                                    return value > 0 ? sportTheme.primaryColor : 'rgba(42, 42, 42, 0.5)';
                                 },
                                 borderRadius: 8,
                                 barThickness: 40
@@ -1413,7 +1463,7 @@ studentDashboardRoutes.get('/', (c) => {
                                 legend: { display: false },
                                 tooltip: {
                                     backgroundColor: '#1A1A1A',
-                                    borderColor: '#CCFF00',
+                                    borderColor: sportTheme.primaryColor,
                                     borderWidth: 1
                                 }
                             }
