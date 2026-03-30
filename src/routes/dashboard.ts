@@ -645,17 +645,30 @@ dashboardRoutes.get('/ai-generator', (c) => {
             // OMNI-SPORT: Load available sports
             async function loadSports() {
                 try {
+                    console.log('📡 Loading sports configs...');
                     const response = await axios.get('/api/sports/configs', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
 
+                    console.log('✅ Sports response:', response.data);
+
                     sportsConfig = response.data.sports;
                     const select = document.getElementById('sportType');
                     
+                    if (!sportsConfig || sportsConfig.length === 0) {
+                        select.innerHTML = '<option value="">Nenhuma modalidade disponível</option>';
+                        console.error('⚠️ No sports returned from API');
+                        return;
+                    }
+                    
                     select.innerHTML = '<option value="">Selecione a modalidade</option>' +
                         sportsConfig.map(s => '<option value="' + s.type + '">' + s.name + '</option>').join('');
+                    
+                    console.log('✅ Sports loaded:', sportsConfig.length, 'modalities');
                 } catch (error) {
-                    console.error('Error loading sports:', error);
+                    console.error('❌ Error loading sports:', error);
+                    console.error('   Message:', error.message);
+                    console.error('   Response:', error.response?.data);
                     document.getElementById('sportType').innerHTML = '<option value="">Erro ao carregar modalidades</option>';
                 }
             }
@@ -814,6 +827,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
             // Load students
             async function loadStudents() {
                 try {
+                    console.log('📡 Loading students...');
                     const response = await axios.get('/api/students', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
@@ -823,13 +837,18 @@ dashboardRoutes.get('/ai-generator', (c) => {
                     
                     if (students.length === 0) {
                         select.innerHTML = '<option value="">Nenhum aluno cadastrado</option>';
+                        console.log('⚠️ No students found');
                         return;
                     }
 
                     select.innerHTML = '<option value="">Selecione um aluno</option>' +
-                        students.map(s => \`<option value="\${s.id}">\${s.full_name} - \${s.goal || 'Sem objetivo'}</option>\`).join('');
+                        students.map(s => '<option value="' + s.id + '">' + s.full_name + ' - ' + (s.goal || 'Sem objetivo') + '</option>').join('');
+                    
+                    console.log('✅ Students loaded:', students.length);
                 } catch (error) {
-                    console.error('Error loading students:', error);
+                    console.error('❌ Error loading students:', error);
+                    console.error('   Message:', error.message);
+                    console.error('   Response:', error.response?.data);
                 }
             }
 
@@ -2014,8 +2033,26 @@ dashboardRoutes.get('/students', (c) => {
 
             let currentStudentId = null;
 
-            // Load students on page load
-            loadStudents();
+            // Load sports and students on page load
+            (async function init() {
+                // Wait for Axios to be available
+                if (typeof axios === 'undefined') {
+                    console.log('⏳ Waiting for Axios to load...');
+                    await new Promise(resolve => {
+                        const checkAxios = setInterval(() => {
+                            if (typeof axios !== 'undefined') {
+                                clearInterval(checkAxios);
+                                resolve();
+                            }
+                        }, 100);
+                    });
+                }
+                
+                console.log('🚀 Initializing AI Generator...');
+                await loadSports();
+                await loadStudents();
+                console.log('✅ Initialization complete');
+            })();
         </script>
     </body>
     </html>

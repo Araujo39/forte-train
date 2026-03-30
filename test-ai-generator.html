@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Generator - Sports Loading</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+</head>
+<body style="font-family: monospace; padding: 20px; background: #0D0D0D; color: #CCFF00;">
+    <h1>🧪 ForteTrain AI Generator - Sports Loading Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'https://fortetrain.pages.dev';
+        const results = document.getElementById('results');
+
+        function log(message, type = 'info') {
+            const colors = {
+                info: '#00D4FF',
+                success: '#CCFF00',
+                error: '#FF4757',
+                warning: '#FFD700'
+            };
+            results.innerHTML += `<div style="color: ${colors[type]}; margin: 10px 0;">${message}</div>`;
+        }
+
+        async function testSportsEndpoint() {
+            log('🔍 Testing GET /api/sports/configs (without auth)...', 'info');
+            
+            try {
+                const response = await axios.get(`${API_BASE}/api/sports/configs`);
+                
+                if (response.data.success && response.data.sports) {
+                    log(`✅ SUCCESS: ${response.data.sports.length} sports loaded`, 'success');
+                    
+                    response.data.sports.forEach((sport, idx) => {
+                        log(`   ${idx + 1}. ${sport.name} (${sport.type}) - ${sport.primaryColor}`, 'info');
+                    });
+                } else {
+                    log('❌ FAILED: Invalid response format', 'error');
+                }
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`, 'error');
+                if (error.response) {
+                    log(`   Status: ${error.response.status}`, 'error');
+                    log(`   Data: ${JSON.stringify(error.response.data)}`, 'error');
+                }
+            }
+        }
+
+        async function testWithAuth() {
+            log('\n🔐 Testing WITH authentication...', 'info');
+            log('Step 1: Login as Personal Trainer...', 'info');
+            
+            try {
+                const loginResponse = await axios.post(`${API_BASE}/api/auth/login`, {
+                    email: 'andre@fortetrain.app',
+                    password: 'demo123'
+                });
+
+                if (loginResponse.data.token) {
+                    log('✅ Login successful!', 'success');
+                    const token = loginResponse.data.token;
+
+                    log('\nStep 2: Fetch sports with token...', 'info');
+                    
+                    const sportsResponse = await axios.get(`${API_BASE}/api/sports/configs`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (sportsResponse.data.success) {
+                        log(`✅ SUCCESS: ${sportsResponse.data.sports.length} sports loaded with auth`, 'success');
+                    } else {
+                        log('❌ FAILED: Invalid response with auth', 'error');
+                    }
+                } else {
+                    log('❌ Login failed: No token received', 'error');
+                }
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`, 'error');
+                if (error.response) {
+                    log(`   Status: ${error.response.status}`, 'error');
+                }
+            }
+        }
+
+        async function runAllTests() {
+            log('🚀 Starting ForteTrain Sports Loading Tests\n', 'info');
+            log('Environment: Production (https://fortetrain.pages.dev)', 'warning');
+            log('='.repeat(60), 'info');
+            
+            await testSportsEndpoint();
+            await testWithAuth();
+            
+            log('\n' + '='.repeat(60), 'info');
+            log('✅ All tests completed!', 'success');
+        }
+
+        // Run tests on page load
+        runAllTests();
+    </script>
+</body>
+</html>
