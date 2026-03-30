@@ -39,6 +39,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | Rota | Descrição |
 |------|-----------|
 | `/` | Landing Page com tema Ultra Dark |
+| **🏆 `/omni-sport`** | **Landing Page Omni-Sport com Tabs Interativos** |
 | `/auth/login` | Login (Admin/Personal/Aluno) |
 | `/auth/register` | Cadastro de nova conta |
 | `/dashboard` | Dashboard principal do Personal |
@@ -49,7 +50,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/dashboard/notifications` | **Sistema de Notificações WhatsApp** |
 | `/dashboard/settings` | **Configurações e API Keys** |
 | `/student/app` | **WebApp do Aluno (Player de Treino + Vision)** |
-| **✨ `/student/dashboard`** | **Elite Student Dashboard (Carbon Performance Design)** |
+| **✨ `/student/dashboard`** | **Elite Student Dashboard (Carbon Performance + 🏆 Dynamic Sport Theme)** |
 | **🆕 `/dashboard/student/:id`** | **Página de Detalhes do Aluno (Fotos, Medições, Metas)** |
 | `/api/auth/login` | API de autenticação |
 | `/api/dashboard/stats` | Estatísticas do dashboard |
@@ -223,7 +224,7 @@ plan_limits (Configuração de planos)
 - **150 registros** de seed data
 - **MRR**: R$ 999.60
 - **ARR**: R$ 11,995.20
-- **Build size**: 517 KB (bundle SSR, +106 KB para Omni-Sport)
+- **Build size**: 547 KB (bundle SSR, +136 KB para Omni-Sport completo)
 
 ### 📍 Principais Tabelas
 
@@ -440,20 +441,23 @@ O ForteTrain foi desenvolvido para lançamento no Arnold Sports Festival 2026 em
 
 ### Última Atualização
 - **Data**: 2026-03-30
-- **Versão**: 8.0 Omni-Sport 🏆
-- **Status**: ✅ **99% Completo** - Plataforma multi-esporte em produção
+- **Versão**: 8.0 Omni-Sport 🏆 (COMPLETO)
+- **Status**: ✅ **Produção** - Plataforma multi-esporte em produção
 - **Novidades v8.0**: 
   - 🏆 **Omni-Sport Architecture**: Suporte a 9 modalidades esportivas
   - 🎯 **Métricas JSONB Dinâmicas**: Flexibilidade total por esporte
   - 🤖 **Prompts IA Especializados**: Geração personalizada por modalidade
   - 🎨 **Sport Theme System**: Cores e ícones dinâmicos por esporte
   - 📊 **Sport Configs API**: Endpoint RESTful para configurações de esportes
+  - 🌐 **Omni-Sport Landing Page**: Showcase interativo com tabs por modalidade
+  - ✨ **Student Dashboard Dynamic**: Theme adapta ao esporte do aluno
 - **Novidades v7.0**: 
   - ✨ **Elite UI/UX 'Carbon Performance'**: Student Dashboard refatorado
   - 🔥 **Flame Counter Animado**: Gamificação de sequência de treinos
   - 🏅 **Badges 3D Metálicos**: Sistema de conquistas visual
   - 📸 **Timeline de Transformação**: Before/After com fotos side-by-side
-- **Próximos Passos**: Landing page Omni-Sport com tabs interativos, Student Dashboard com UI dinâmica por esporte
+- **Build**: 546.89 KB (bundle SSR)
+- **Deploy**: https://fe4d9e11.fortetrain.pages.dev
 
 ### Comandos Úteis
 
@@ -723,12 +727,83 @@ element.style.boxShadow = `0 0 20px ${theme.glowColor}`;
 | Esportes | Musculação only | 9 modalidades |
 | Métricas | Séries/reps fixos | JSONB dinâmico |
 | IA Prompts | Genérico | Especializado por esporte |
-| UI Theme | Neon green fixo | Cores dinâmicas |
-| Icons | Dumbbell fixo | Ícone por esporte |
-| AI Generator | Básico | Sport selector + experience level |
-| Student Dashboard | Static | Dynamic (próxima fase) |
-| Landing Page | Corporate | Omni-Sport tabs (próxima fase) |
-| Build Size | 488.60 KB | 517 KB (+28 KB) |
+| UI Theme | Neon green fixo | Cores dinâmicas ✅ |
+| Icons | Dumbbell fixo | Ícone por esporte ✅ |
+| AI Generator | Básico | Sport selector + experience level ✅ |
+| Student Dashboard | Static | Dynamic theme ✅ |
+| Landing Page | Corporate | Omni-Sport tabs ✅ |
+| Build Size | 488.60 KB | 546.89 KB (+58 KB) |
+
+### 🌐 Omni-Sport Landing Page
+
+**URL**: https://fortetrain.pages.dev/omni-sport
+
+**Seções**:
+
+1. **Hero Section**:
+   - Logo animado com float effect
+   - Tagline: "Omni-Sport Intelligence"
+   - Badge: "9 Modalidades Esportivas"
+   - CTA: "Explore as Modalidades"
+
+2. **Sports Showcase (Interactive Tabs)**:
+   - **Grid de 9 tabs** com ícones e cores únicas
+   - **Hover effect**: Border glow e lift
+   - **Active tab**: Glow box-shadow na cor do esporte
+   - **Dynamic content**: Muda ao clicar no tab
+
+3. **Tab Content Card** (para cada esporte):
+   - **Left Side**:
+     - Sport icon animado com gradient
+     - Nome e descrição da modalidade
+     - **Métricas rastreadas**: Pills com métricas específicas
+     - **Recursos especializados**: Lista com checkmarks
+   - **Right Side**:
+     - Preview visual (placeholder para screenshots)
+     - CTA: "Testar Agora" com cor do esporte
+
+4. **Features Section**:
+   - 3 cards com ícones animados
+   - IA Especializada, Métricas Relevantes, UI Adaptativa
+
+5. **Pricing Section**:
+   - Pro Plan: R$ 199/mês
+   - Lista de benefícios com checkmarks neon
+   - CTA: "Começar Teste Grátis"
+
+**Tecnologia**:
+- Pure JavaScript (sem frameworks)
+- Tailwind CSS via CDN
+- Font Awesome icons
+- Smooth scroll e fade animations
+
+---
+
+### 🎨 Student Dashboard - Dynamic Sport Theme
+
+**Novidade v8.0**: Dashboard se adapta automaticamente ao esporte do aluno!
+
+**Como funciona**:
+1. **Login do aluno** → JWT contém `studentId`
+2. **Fetch student data** → Inclui `primary_sport` (ex: "cycling")
+3. **Apply theme** → `applySportTheme(primarySport)` executa
+4. **CSS variables update**:
+   - `--sport-primary`: Cor primária do esporte
+   - `--sport-secondary`: Cor secundária
+   - `--sport-gradient`: Gradient do esporte
+   - `--sport-glow`: Glow effect
+
+**Elementos Afetados**:
+- ✅ **Flame Counter Icon**: Muda para ícone do esporte
+- ✅ **Stat Card Icons**: Atualizam para ícone relevante
+- ✅ **Primary Buttons**: Gradient do esporte aplicado
+- ✅ **Badges Glow**: Glow na cor do esporte
+- ✅ **Neon Gradient**: Usa `var(--sport-gradient)`
+
+**Exemplo**:
+- Aluno de **Ciclismo**: Dashboard fica azul elétrico (#00D4FF) com ícone de bike
+- Aluno de **Tênis**: Dashboard fica dourado (#FFD700) com ícone de raquete
+- Aluno de **CrossFit**: Dashboard fica vermelho (#FF0000) com ícone de raio
 
 ---
 
