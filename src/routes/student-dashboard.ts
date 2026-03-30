@@ -18,6 +18,14 @@ studentDashboardRoutes.get('/', (c) => {
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
+            :root {
+                /* 🏆 OMNI-SPORT: Dynamic CSS Variables */
+                --sport-primary: #CCFF00;
+                --sport-secondary: #99FF00;
+                --sport-gradient: linear-gradient(135deg, #CCFF00, #99FF00);
+                --sport-glow: rgba(204, 255, 0, 0.5);
+            }
+            
             * {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             }
@@ -44,13 +52,13 @@ studentDashboardRoutes.get('/', (c) => {
                 border: 1px solid rgba(255, 255, 255, 0.08);
             }
 
-            /* Neon Gradient */
+            /* Neon Gradient - Dynamic */
             .neon-gradient {
-                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+                background: var(--sport-gradient);
             }
 
             .neon-gradient-text {
-                background: linear-gradient(135deg, #CCFF00 0%, #99FF00 100%);
+                background: var(--sport-gradient);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
@@ -1108,6 +1116,56 @@ studentDashboardRoutes.get('/', (c) => {
                 document.getElementById('greetingEmoji').textContent = emoji;
             }
 
+            // 🏆 OMNI-SPORT: Sport Theme System
+            const SPORT_THEMES = {
+                bodybuilding: { name: 'Musculação', icon: 'fa-dumbbell', primaryColor: '#CCFF00', secondaryColor: '#99FF00', gradient: 'linear-gradient(135deg, #CCFF00, #99FF00)', glowColor: 'rgba(204, 255, 0, 0.5)' },
+                cycling: { name: 'Ciclismo', icon: 'fa-bicycle', primaryColor: '#00D4FF', secondaryColor: '#0099CC', gradient: 'linear-gradient(135deg, #00D4FF, #0099CC)', glowColor: 'rgba(0, 212, 255, 0.5)' },
+                running: { name: 'Corrida', icon: 'fa-person-running', primaryColor: '#7CFC00', secondaryColor: '#32CD32', gradient: 'linear-gradient(135deg, #7CFC00, #32CD32)', glowColor: 'rgba(124, 252, 0, 0.5)' },
+                tennis: { name: 'Tênis', icon: 'fa-table-tennis-paddle-ball', primaryColor: '#FFD700', secondaryColor: '#FFA500', gradient: 'linear-gradient(135deg, #FFD700, #FFA500)', glowColor: 'rgba(255, 215, 0, 0.5)' },
+                beach_tennis: { name: 'Beach Tennis', icon: 'fa-sun', primaryColor: '#FF6B35', secondaryColor: '#FF4757', gradient: 'linear-gradient(135deg, #FF6B35, #FF4757)', glowColor: 'rgba(255, 107, 53, 0.5)' },
+                swimming: { name: 'Natação', icon: 'fa-person-swimming', primaryColor: '#00CED1', secondaryColor: '#008B8B', gradient: 'linear-gradient(135deg, #00CED1, #008B8B)', glowColor: 'rgba(0, 206, 209, 0.5)' },
+                crossfit: { name: 'CrossFit', icon: 'fa-bolt', primaryColor: '#FF0000', secondaryColor: '#CC0000', gradient: 'linear-gradient(135deg, #FF0000, #CC0000)', glowColor: 'rgba(255, 0, 0, 0.5)' },
+                pilates: { name: 'Pilates', icon: 'fa-circle-dot', primaryColor: '#FF69B4', secondaryColor: '#FF1493', gradient: 'linear-gradient(135deg, #FF69B4, #FF1493)', glowColor: 'rgba(255, 105, 180, 0.5)' },
+                physiotherapy: { name: 'Fisioterapia', icon: 'fa-heart-pulse', primaryColor: '#9370DB', secondaryColor: '#6A5ACD', gradient: 'linear-gradient(135deg, #9370DB, #6A5ACD)', glowColor: 'rgba(147, 112, 219, 0.5)' }
+            };
+
+            async function applySportTheme(sportType) {
+                const theme = SPORT_THEMES[sportType] || SPORT_THEMES.bodybuilding;
+                console.log('🎨 Applying theme:', theme.name, theme.primaryColor);
+                
+                // Apply to CSS variables
+                document.documentElement.style.setProperty('--sport-primary', theme.primaryColor);
+                document.documentElement.style.setProperty('--sport-secondary', theme.secondaryColor);
+                document.documentElement.style.setProperty('--sport-gradient', theme.gradient);
+                document.documentElement.style.setProperty('--sport-glow', theme.glowColor);
+                
+                // Update flame counter icon and color
+                const flameIcon = document.querySelector('.flame-counter i');
+                if (flameIcon) {
+                    flameIcon.className = 'fas ' + theme.icon;
+                }
+                
+                // Update stat card icons
+                const statIcons = document.querySelectorAll('.stat-card i.fa-dumbbell');
+                statIcons.forEach(icon => {
+                    icon.className = 'fas ' + theme.icon + ' text-2xl';
+                    icon.style.color = theme.primaryColor;
+                });
+                
+                // Update primary buttons
+                const primaryButtons = document.querySelectorAll('.neon-gradient, .btn-start-workout');
+                primaryButtons.forEach(btn => {
+                    btn.style.background = theme.gradient;
+                    btn.style.boxShadow = '0 0 30px ' + theme.glowColor;
+                });
+                
+                // Update badges glow
+                const activeBadges = document.querySelectorAll('.badge-gold, .badge-silver, .badge-bronze');
+                activeBadges.forEach(badge => {
+                    badge.style.filter = 'drop-shadow(0 0 20px ' + theme.glowColor + ')';
+                });
+            }
+
             // Initialize
             async function init() {
                 try {
@@ -1128,6 +1186,11 @@ studentDashboardRoutes.get('/', (c) => {
                     // Load student data
                     const studentRes = await axios.get(\`/api/students/\${studentId}\`);
                     studentData = studentRes.data;
+                    
+                    // 🏆 OMNI-SPORT: Apply dynamic theme based on primary_sport
+                    const primarySport = studentData.primary_sport || 'bodybuilding';
+                    console.log('🎨 Applying sport theme:', primarySport);
+                    await applySportTheme(primarySport);
                     
                     const firstName = studentData.full_name ? studentData.full_name.split(' ')[0] : 'Aluno';
                     const initials = studentData.full_name ? studentData.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'AL';
