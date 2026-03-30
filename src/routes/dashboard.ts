@@ -653,7 +653,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
                     const select = document.getElementById('sportType');
                     
                     select.innerHTML = '<option value="">Selecione a modalidade</option>' +
-                        sportsConfig.map(s => `<option value="${s.type}">${s.name}</option>`).join('');
+                        sportsConfig.map(s => '<option value="' + s.type + '">' + s.name + '</option>').join('');
                 } catch (error) {
                     console.error('Error loading sports:', error);
                     document.getElementById('sportType').innerHTML = '<option value="">Erro ao carregar modalidades</option>';
@@ -670,7 +670,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
 
                 // Update sport description
                 document.getElementById('sportDescription').textContent = 
-                    `Gerando treino otimizado para ${currentSport.name}`;
+                    'Gerando treino otimizado para ' + currentSport.name;
 
                 // Update dynamic focus field based on sport
                 const focusConfigs = {
@@ -807,7 +807,7 @@ dashboardRoutes.get('/ai-generator', (c) => {
 
                 const options = equipmentOptions[sportType] || equipmentOptions.bodybuilding;
                 document.getElementById('equipment').innerHTML = options.map(opt => 
-                    `<option value="${opt.value}">${opt.label}</option>`
+                    '<option value="' + opt.value + '">' + opt.label + '</option>'
                 ).join('');
             }
 
@@ -837,38 +837,26 @@ dashboardRoutes.get('/ai-generator', (c) => {
             document.getElementById('workoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
+                const sportType = document.getElementById('sportType').value;
                 const studentId = document.getElementById('studentId').value;
-                const workoutType = document.getElementById('workoutType').value;
-                const muscleFocus = document.getElementById('muscleFocus').value;
+                const experienceLevel = document.getElementById('experienceLevel').value;
+                const focus = document.getElementById('focusField').value;
                 const duration = document.getElementById('duration').value;
                 const equipment = document.getElementById('equipment').value;
                 const notes = document.getElementById('notes').value;
+
+                if (!sportType) {
+                    alert('Por favor, selecione uma modalidade esportiva');
+                    return;
+                }
 
                 if (!studentId) {
                     alert('Por favor, selecione um aluno');
                     return;
                 }
 
-                // Build prompt
-                const prompt = \`Crie um treino de \${workoutType} focado em \${muscleFocus}.
-Duração: \${duration} minutos
-Equipamentos: \${equipment}
-\${notes ? 'Observações: ' + notes : ''}
-
-Retorne APENAS um JSON válido seguindo exatamente esta estrutura:
-{
-  "title": "Nome do Treino",
-  "description": "Descrição breve do treino",
-  "exercises": [
-    {
-      "name": "Nome do Exercício",
-      "sets": 4,
-      "reps": "8-12",
-      "rest": 90,
-      "notes": "Observações técnicas importantes"
-    }
-  ]
-}\`;
+                // Build sport-specific prompt
+                const prompt = 'Crie um treino de ' + currentSport.name + ' com foco em: ' + focus + '.\\nDuração/Distância: ' + duration + '\\nContexto: ' + equipment + '\\nNível: ' + experienceLevel + '\\n' + (notes ? 'Observações: ' + notes : '');
 
                 // Show loading
                 document.getElementById('emptySection').classList.add('hidden');
@@ -879,47 +867,121 @@ Retorne APENAS um JSON válido seguindo exatamente esta estrutura:
 
                 try {
                     const response = await axios.post('/api/ai/generate-workout',
-                        { studentId, prompt },
+                        { 
+                            studentId, 
+                            prompt,
+                            sportType,
+                            experienceLevel
+                        },
                         { headers: { 'Authorization': 'Bearer ' + token } }
                     );
 
                     currentWorkoutData = response.data.workout;
 
-                    // Display result
-                    document.getElementById('workoutTitle').textContent = currentWorkoutData.title;
-                    document.getElementById('workoutDescription').textContent = currentWorkoutData.description;
+                    // Display result with sport-specific rendering
+                    document.getElementById('workoutTitle').textContent = currentWorkoutData.title || ('Treino de ' + currentSport.name);
+                    document.getElementById('workoutDescription').textContent = currentWorkoutData.description || '';
 
-                    const exercisesHtml = currentWorkoutData.exercises.map((ex, idx) => \`
-                        <div class="exercise-card p-4 rounded-lg">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-green-400 flex items-center justify-center text-black font-bold mr-3">
-                                        \${idx + 1}
-                                    </div>
-                                    <h4 class="font-bold text-lg">\${ex.name}</h4>
-                                </div>
-                            </div>
-                            <div class="ml-11 grid grid-cols-3 gap-4 text-sm mb-2">
-                                <div>
-                                    <span class="text-gray-400">Séries:</span>
-                                    <span class="font-bold ml-2">\${ex.sets}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-400">Reps:</span>
-                                    <span class="font-bold ml-2">\${ex.reps}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-400">Descanso:</span>
-                                    <span class="font-bold ml-2">\${ex.rest}s</span>
-                                </div>
-                            </div>
-                            \${ex.notes ? \`<div class="ml-11 text-sm text-gray-400 mt-2">
-                                <i class="fas fa-info-circle mr-1"></i>\${ex.notes}
-                            </div>\` : ''}
-                        </div>
-                    \`).join('');
+                    // Render exercises/drills dynamically based on sport
+                    let contentHtml = '';
+                    
+                    if (currentWorkoutData.exercises && Array.isArray(currentWorkoutData.exercises)) {
+                        // Bodybuilding, CrossFit, Pilates, Physiotherapy format
+                        contentHtml = currentWorkoutData.exercises.map((ex, idx) => 
+                            '<div class="exercise-card p-4 rounded-lg">' +
+                                '<div class="flex items-start justify-between mb-2">' +
+                                    '<div class="flex items-center">' +
+                                        '<div class="w-8 h-8 rounded-full flex items-center justify-center text-black font-bold mr-3" style="background: ' + currentSport.primaryColor + ';">' +
+                                            (idx + 1) +
+                                        '</div>' +
+                                        '<h4 class="font-bold text-lg">' + (ex.name || ex.movement) + '</h4>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="ml-11 text-sm space-y-1">' +
+                                    (ex.sets ? '<div><span class="text-gray-400">Séries:</span> <span class="font-bold">' + ex.sets + '</span></div>' : '') +
+                                    (ex.reps ? '<div><span class="text-gray-400">Reps:</span> <span class="font-bold">' + ex.reps + '</span></div>' : '') +
+                                    (ex.weight ? '<div><span class="text-gray-400">Carga:</span> <span class="font-bold">' + ex.weight + 'kg</span></div>' : '') +
+                                    (ex.rest ? '<div><span class="text-gray-400">Descanso:</span> <span class="font-bold">' + ex.rest + 's</span></div>' : '') +
+                                    (ex.rest_seconds ? '<div><span class="text-gray-400">Descanso:</span> <span class="font-bold">' + ex.rest_seconds + 's</span></div>' : '') +
+                                    (ex.duration ? '<div><span class="text-gray-400">Duração:</span> <span class="font-bold">' + ex.duration + '</span></div>' : '') +
+                                    (ex.tempo ? '<div><span class="text-gray-400">Tempo:</span> <span class="font-bold">' + ex.tempo + '</span></div>' : '') +
+                                    (ex.breathing_pattern ? '<div><span class="text-gray-400">Respiração:</span> <span class="font-bold">' + ex.breathing_pattern + '</span></div>' : '') +
+                                    (ex.notes ? '<div class="text-gray-400 mt-2"><i class="fas fa-info-circle mr-1"></i>' + ex.notes + '</div>' : '') +
+                                '</div>' +
+                            '</div>'
+                        ).join('');
+                    } else if (currentWorkoutData.drills && Array.isArray(currentWorkoutData.drills)) {
+                        // Tennis, Beach Tennis format
+                        contentHtml = currentWorkoutData.drills.map((drill, idx) => 
+                            '<div class="exercise-card p-4 rounded-lg">' +
+                                '<div class="flex items-start justify-between mb-2">' +
+                                    '<div class="flex items-center">' +
+                                        '<div class="w-8 h-8 rounded-full flex items-center justify-center text-black font-bold mr-3" style="background: ' + currentSport.primaryColor + ';">' +
+                                            (idx + 1) +
+                                        '</div>' +
+                                        '<h4 class="font-bold text-lg">' + (drill.name || drill.type) + '</h4>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="ml-11 text-sm space-y-1">' +
+                                    (drill.type ? '<div><span class="text-gray-400">Tipo:</span> <span class="font-bold">' + drill.type + '</span></div>' : '') +
+                                    (drill.duration ? '<div><span class="text-gray-400">Duração:</span> <span class="font-bold">' + drill.duration + '</span></div>' : '') +
+                                    (drill.intensity ? '<div><span class="text-gray-400">Intensidade:</span> <span class="font-bold">' + drill.intensity + '</span></div>' : '') +
+                                    (drill.repetitions ? '<div><span class="text-gray-400">Repetições:</span> <span class="font-bold">' + drill.repetitions + '</span></div>' : '') +
+                                    (drill.focus ? '<div><span class="text-gray-400">Foco:</span> <span class="font-bold">' + drill.focus + '</span></div>' : '') +
+                                '</div>' +
+                            '</div>'
+                        ).join('');
+                    } else if (currentWorkoutData.sets && Array.isArray(currentWorkoutData.sets)) {
+                        // Swimming format
+                        contentHtml = currentWorkoutData.sets.map((set, idx) => 
+                            '<div class="exercise-card p-4 rounded-lg">' +
+                                '<div class="flex items-start justify-between mb-2">' +
+                                    '<div class="flex items-center">' +
+                                        '<div class="w-8 h-8 rounded-full flex items-center justify-center text-black font-bold mr-3" style="background: ' + currentSport.primaryColor + ';">' +
+                                            (idx + 1) +
+                                        '</div>' +
+                                        '<h4 class="font-bold text-lg">' + set.distance + ' - ' + set.stroke + '</h4>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="ml-11 text-sm space-y-1">' +
+                                    (set.interval ? '<div><span class="text-gray-400">Intervalo:</span> <span class="font-bold">' + set.interval + '</span></div>' : '') +
+                                    (set.intensity ? '<div><span class="text-gray-400">Intensidade:</span> <span class="font-bold">' + set.intensity + '</span></div>' : '') +
+                                    (set.rest ? '<div><span class="text-gray-400">Descanso:</span> <span class="font-bold">' + set.rest + '</span></div>' : '') +
+                                    (set.focus ? '<div><span class="text-gray-400">Foco:</span> <span class="font-bold">' + set.focus + '</span></div>' : '') +
+                                '</div>' +
+                            '</div>'
+                        ).join('');
+                    } else if (currentWorkoutData.intervals && Array.isArray(currentWorkoutData.intervals)) {
+                        // Cycling, Running format
+                        contentHtml = currentWorkoutData.intervals.map((interval, idx) => 
+                            '<div class="exercise-card p-4 rounded-lg">' +
+                                '<div class="flex items-start justify-between mb-2">' +
+                                    '<div class="flex items-center">' +
+                                        '<div class="w-8 h-8 rounded-full flex items-center justify-center text-black font-bold mr-3" style="background: ' + currentSport.primaryColor + ';">' +
+                                            (idx + 1) +
+                                        '</div>' +
+                                        '<h4 class="font-bold text-lg">Intervalo ' + (idx + 1) + '</h4>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="ml-11 text-sm space-y-1">' +
+                                    (interval.duration ? '<div><span class="text-gray-400">Duração:</span> <span class="font-bold">' + interval.duration + '</span></div>' : '') +
+                                    (interval.distance ? '<div><span class="text-gray-400">Distância:</span> <span class="font-bold">' + interval.distance + '</span></div>' : '') +
+                                    (interval.power_target ? '<div><span class="text-gray-400">Potência Alvo:</span> <span class="font-bold">' + interval.power_target + '</span></div>' : '') +
+                                    (interval.pace ? '<div><span class="text-gray-400">Pace:</span> <span class="font-bold">' + interval.pace + '</span></div>' : '') +
+                                    (interval.recovery ? '<div><span class="text-gray-400">Recuperação:</span> <span class="font-bold">' + interval.recovery + '</span></div>' : '') +
+                                    (interval.heart_rate_zone ? '<div><span class="text-gray-400">Zona FC:</span> <span class="font-bold">' + interval.heart_rate_zone + '</span></div>' : '') +
+                                '</div>' +
+                            '</div>'
+                        ).join('');
+                    } else {
+                        // Fallback: display raw JSON
+                        contentHtml = 
+                            '<div class="exercise-card p-4 rounded-lg">' +
+                                '<pre class="text-sm text-gray-300 overflow-auto">' + JSON.stringify(currentWorkoutData, null, 2) + '</pre>' +
+                            '</div>';
+                    }
 
-                    document.getElementById('exercisesList').innerHTML = exercisesHtml;
+                    document.getElementById('exercisesList').innerHTML = contentHtml;
 
                     document.getElementById('loadingSection').classList.add('hidden');
                     document.getElementById('resultSection').classList.remove('hidden');
