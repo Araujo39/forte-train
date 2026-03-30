@@ -642,18 +642,33 @@ dashboardRoutes.get('/ai-generator', (c) => {
             let sportsConfig = [];
             let currentSport = null;
 
-            // OMNI-SPORT: Load available sports
+            // OMNI-SPORT: Load available sports (using native fetch)
             async function loadSports() {
                 try {
-                    console.log('📡 Loading sports configs...');
-                    const response = await axios.get('/api/sports/configs', {
-                        headers: { 'Authorization': 'Bearer ' + token }
+                    console.log('📡 [' + new Date().toISOString() + '] Loading sports configs...');
+                    
+                    const response = await fetch('/api/sports/configs', {
+                        method: 'GET',
+                        headers: { 
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        }
                     });
 
-                    console.log('✅ Sports response:', response.data);
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                    }
 
-                    sportsConfig = response.data.sports;
+                    const data = await response.json();
+                    console.log('✅ Sports response:', data);
+
+                    sportsConfig = data.sports || [];
                     const select = document.getElementById('sportType');
+                    
+                    if (!select) {
+                        console.error('❌ Element #sportType not found!');
+                        return;
+                    }
                     
                     if (!sportsConfig || sportsConfig.length === 0) {
                         select.innerHTML = '<option value="">Nenhuma modalidade disponível</option>';
@@ -668,8 +683,11 @@ dashboardRoutes.get('/ai-generator', (c) => {
                 } catch (error) {
                     console.error('❌ Error loading sports:', error);
                     console.error('   Message:', error.message);
-                    console.error('   Response:', error.response?.data);
-                    document.getElementById('sportType').innerHTML = '<option value="">Erro ao carregar modalidades</option>';
+                    console.error('   Stack:', error.stack);
+                    const select = document.getElementById('sportType');
+                    if (select) {
+                        select.innerHTML = '<option value="">Erro ao carregar modalidades</option>';
+                    }
                 }
             }
 
@@ -824,16 +842,31 @@ dashboardRoutes.get('/ai-generator', (c) => {
                 ).join('');
             }
 
-            // Load students
+            // Load students (using native fetch)
             async function loadStudents() {
                 try {
-                    console.log('📡 Loading students...');
-                    const response = await axios.get('/api/students', {
-                        headers: { 'Authorization': 'Bearer ' + token }
+                    console.log('📡 [' + new Date().toISOString() + '] Loading students...');
+                    
+                    const response = await fetch('/api/students', {
+                        method: 'GET',
+                        headers: { 
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        }
                     });
 
-                    const students = response.data.students;
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                    }
+
+                    const data = await response.json();
+                    const students = data.students || [];
                     const select = document.getElementById('studentId');
+                    
+                    if (!select) {
+                        console.error('❌ Element #studentId not found!');
+                        return;
+                    }
                     
                     if (students.length === 0) {
                         select.innerHTML = '<option value="">Nenhum aluno cadastrado</option>';
@@ -847,6 +880,14 @@ dashboardRoutes.get('/ai-generator', (c) => {
                     console.log('✅ Students loaded:', students.length);
                 } catch (error) {
                     console.error('❌ Error loading students:', error);
+                    console.error('   Message:', error.message);
+                    console.error('   Stack:', error.stack);
+                    const select = document.getElementById('studentId');
+                    if (select) {
+                        select.innerHTML = '<option value="">Erro ao carregar alunos</option>';
+                    }
+                }
+            }
                     console.error('   Message:', error.message);
                     console.error('   Response:', error.response?.data);
                 }
@@ -2033,26 +2074,20 @@ dashboardRoutes.get('/students', (c) => {
 
             let currentStudentId = null;
 
-            // Load sports and students on page load
-            (async function init() {
-                // Wait for Axios to be available
-                if (typeof axios === 'undefined') {
-                    console.log('⏳ Waiting for Axios to load...');
-                    await new Promise(resolve => {
-                        const checkAxios = setInterval(() => {
-                            if (typeof axios !== 'undefined') {
-                                clearInterval(checkAxios);
-                                resolve();
-                            }
-                        }, 100);
-                    });
-                }
+            // Initialize - Simplified without Axios dependency
+            window.addEventListener('DOMContentLoaded', async function() {
+                console.log('🚀 [' + new Date().toISOString() + '] Initializing AI Generator...');
+                console.log('   Token present:', !!token);
+                console.log('   Token length:', token ? token.length : 0);
                 
-                console.log('🚀 Initializing AI Generator...');
-                await loadSports();
-                await loadStudents();
-                console.log('✅ Initialization complete');
-            })();
+                try {
+                    await loadSports();
+                    await loadStudents();
+                    console.log('✅ Initialization complete');
+                } catch (error) {
+                    console.error('❌ Initialization failed:', error);
+                }
+            });
         </script>
     </body>
     </html>
