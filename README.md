@@ -224,7 +224,7 @@ plan_limits (Configuração de planos)
 - **150 registros** de seed data
 - **MRR**: R$ 999.60
 - **ARR**: R$ 11,995.20
-- **Build size**: 547 KB (bundle SSR, +136 KB para Omni-Sport completo)
+- **Build size**: 552 KB (bundle SSR, +64 KB para Omni-Sport completo + Sport Badge)
 
 ### 📍 Principais Tabelas
 
@@ -804,6 +804,34 @@ element.style.boxShadow = `0 0 20px ${theme.glowColor}`;
 - Aluno de **Ciclismo**: Dashboard fica azul elétrico (#00D4FF) com ícone de bike
 - Aluno de **Tênis**: Dashboard fica dourado (#FFD700) com ícone de raquete
 - Aluno de **CrossFit**: Dashboard fica vermelho (#FF0000) com ícone de raio
+
+### 🏅 Sport Badge & Dynamic Icons (NEW in v8.0)
+
+**Sport Badge no Perfil**:
+- ✅ Badge dinâmico exibido no perfil do aluno (abaixo do nome)
+- ✅ Gradiente e ícone do esporte com animação de pulsação
+- ✅ Glow effect na cor do esporte
+- ✅ Atualizado automaticamente via `applySportTheme()`
+
+**Ícones Dinâmicos no Treino do Dia**:
+- ✅ Título "Treino de Hoje" usa ícone do esporte (ex: 🚴 para ciclismo)
+- ✅ Cartão de treino com ícone do esporte no header
+- ✅ Duração colorida com primaryColor do esporte
+- ✅ Botão "Iniciar Treino" com gradiente do esporte + glow
+
+**Gráficos com Cores do Esporte**:
+- ✅ Donut chart (Treinos/Sem) usa primaryColor do esporte
+- ✅ Bar chart (Consistência Semanal) usa primaryColor do esporte
+- ✅ Tooltip border colorido por esporte
+
+**Exemplo Visual**:
+```javascript
+// Aluno de Beach Tennis (#FF6B35)
+Sport Badge: [☀️ Beach Tennis] com gradiente laranja + glow
+Treino do Dia: [☀️ Treino de Saque] com ícone de sol laranja
+Donut Chart: Barras laranjas (#FF6B35)
+Botão Iniciar: Gradiente #FF6B35 → #FF4757
+```
 
 ---
 
