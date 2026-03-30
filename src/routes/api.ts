@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { sign, verify } from './jwt-helper'
 import { generateId, hashPassword, verifyPassword } from './utils-helper'
+import { generateSportPrompt, getSportConfig } from '../lib/sport-prompts'
 
 type Bindings = {
   DB: D1Database
@@ -308,6 +309,7 @@ apiRoutes.post('/students', async (c) => {
 
 // ==================== AI WORKOUT GENERATOR ====================
 
+// ==================== OMNI-SPORT AI GENERATOR ====================
 apiRoutes.post('/ai/generate-workout', async (c) => {
   try {
     const auth = c.req.header('Authorization')
@@ -319,7 +321,7 @@ apiRoutes.post('/ai/generate-workout', async (c) => {
     const payload = await verify(token, c.env.JWT_SECRET)
     const tenantId = payload.tenantId
 
-    const { studentId, prompt } = await c.req.json()
+    const { studentId, prompt, sportType = 'bodybuilding', experienceLevel = 'intermediate' } = await c.req.json()
 
     if (!studentId || !prompt) {
       return c.json({ error: 'Missing studentId or prompt' }, 400)
@@ -327,37 +329,31 @@ apiRoutes.post('/ai/generate-workout', async (c) => {
 
     // Get student data
     const student = await c.env.DB.prepare(
-      'SELECT full_name, goal, physical_data FROM students WHERE id = ? AND tenant_id = ?'
+      'SELECT full_name, goal, physical_data, primary_sport FROM students WHERE id = ? AND tenant_id = ?'
     ).bind(studentId, tenantId).first()
 
     if (!student) {
       return c.json({ error: 'Student not found' }, 404)
     }
 
-    // Call OpenAI API
-    const systemPrompt = `Você é um assistente especializado em prescrição de treinos de musculação.
-Analise o perfil do aluno e crie uma ficha de treino técnica e segura.
+    // Get sport configuration
+    const sportConfig = await c.env.DB.prepare(
+      'SELECT * FROM sport_configs WHERE sport_type = ?'
+    ).bind(sportType).first()
 
-Perfil do Aluno:
-- Nome: ${student.full_name}
-- Objetivo: ${student.goal || 'Não especificado'}
-- Dados Físicos: ${student.physical_data || 'Não especificado'}
-
-Retorne APENAS um objeto JSON válido com a seguinte estrutura:
-{
-  "title": "Nome do Treino",
-  "description": "Descrição breve",
-  "exercises": [
-    {
-      "name": "Nome do Exercício",
-      "sets": 4,
-      "reps": "8-12",
-      "rest": 90,
-      "notes": "Observações técnicas"
+    if (!sportConfig) {
+      return c.json({ error: `Sport type '${sportType}' not configured` }, 400)
     }
-  ]
-}`
 
+    // Generate sport-specific AI prompt
+    const aiPrompt = generateSportPrompt(
+      sportType,
+      student.goal || 'General fitness',
+      experienceLevel,
+      `Student: ${student.full_name}. Physical data: ${student.physical_data || 'Not provided'}. User request: ${prompt}`
+    )
+
+    // Call OpenAI API with sport-specific prompt
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -367,15 +363,17 @@ Retorne APENAS um objeto JSON válido com a seguinte estrutura:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
+          { role: 'user', content: aiPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 2500,
+        response_format: { type: 'json_object' }
       })
     })
 
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error('OpenAI API error:', errorText)
       throw new Error('OpenAI API failed')
     }
 
@@ -385,33 +383,48 @@ Retorne APENAS um objeto JSON válido com a seguinte estrutura:
     // Parse AI response
     const workoutData = JSON.parse(aiResponse)
 
-    // Save workout to database
+    // Save workout to database with sport_type and metrics
     const workoutId = generateId()
     const now = Math.floor(Date.now() / 1000)
 
     await c.env.DB.prepare(`
-      INSERT INTO workouts (id, student_id, tenant_id, title, description, exercises, ai_logic_used, is_active, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)
+      INSERT INTO workouts (
+        id, student_id, tenant_id, title, description, 
+        exercises, metrics, sport_type, ai_logic_used, 
+        is_active, created_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
     `).bind(
       workoutId,
       studentId,
       tenantId,
-      workoutData.title,
-      workoutData.description,
-      JSON.stringify(workoutData.exercises),
+      workoutData.title || `Treino de ${sportConfig.display_name}`,
+      workoutData.description || '',
+      JSON.stringify(workoutData.exercises || workoutData),
+      JSON.stringify(workoutData),
+      sportType,
       prompt,
       now
     ).run()
 
-    // Log AI usage
+    // Log AI usage with sport_type
     const tokenUsage = aiData.usage.total_tokens
+    const costPer1kTokens = 0.00015 // GPT-4o-mini pricing
+    const cost = (tokenUsage / 1000) * costPer1kTokens
+
     await c.env.DB.prepare(`
-      INSERT INTO ai_logs (id, tenant_id, token_usage, purpose, model, prompt_tokens, completion_tokens, created_at)
-      VALUES (?, ?, ?, 'Geração de Treino', 'gpt-4o-mini', ?, ?, ?)
+      INSERT INTO ai_logs (
+        id, tenant_id, token_usage, cost_usd, purpose, 
+        model, sport_type, prompt_tokens, completion_tokens, created_at
+      )
+      VALUES (?, ?, ?, ?, ?, 'gpt-4o-mini', ?, ?, ?, ?)
     `).bind(
       generateId(),
       tenantId,
       tokenUsage,
+      cost,
+      `Workout Generation - ${sportConfig.display_name}`,
+      sportType,
       aiData.usage.prompt_tokens,
       aiData.usage.completion_tokens,
       now
@@ -420,11 +433,102 @@ Retorne APENAS um objeto JSON válido com a seguinte estrutura:
     return c.json({
       success: true,
       workoutId,
-      workout: workoutData
+      workout: workoutData,
+      sportType,
+      sportConfig: {
+        name: sportConfig.display_name,
+        icon: sportConfig.icon_name,
+        color: sportConfig.primary_color
+      }
     })
   } catch (error) {
     console.error('AI workout generation error:', error)
-    return c.json({ error: 'Failed to generate workout' }, 500)
+    
+    // Log error to ai_error_logs if it exists
+    try {
+      const auth = c.req.header('Authorization')
+      if (auth) {
+        const token = auth.replace('Bearer ', '')
+        const payload = await verify(token, c.env.JWT_SECRET)
+        
+        await c.env.DB.prepare(`
+          INSERT INTO ai_error_logs (id, tenant_id, error_type, error_message, created_at)
+          VALUES (?, ?, 'workout_generation', ?, ?)
+        `).bind(
+          generateId(),
+          payload.tenantId,
+          error instanceof Error ? error.message : 'Unknown error',
+          Math.floor(Date.now() / 1000)
+        ).run()
+      }
+    } catch (logError) {
+      console.error('Failed to log error:', logError)
+    }
+    
+    return c.json({ 
+      error: 'Failed to generate workout',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// ==================== SPORTS CONFIGURATION ====================
+
+// GET /api/sports/configs - List all available sports
+apiRoutes.get('/sports/configs', async (c) => {
+  try {
+    const configs = await c.env.DB.prepare(`
+      SELECT * FROM sport_configs ORDER BY display_name ASC
+    `).all()
+
+    return c.json({
+      success: true,
+      sports: configs.results.map((sport: any) => ({
+        id: sport.id,
+        type: sport.sport_type,
+        name: sport.display_name,
+        icon: sport.icon_name,
+        primaryColor: sport.primary_color,
+        secondaryColor: sport.secondary_color,
+        metricTemplate: JSON.parse(sport.metric_template),
+        uiTheme: JSON.parse(sport.ui_theme)
+      }))
+    })
+  } catch (error) {
+    console.error('Failed to fetch sport configs:', error)
+    return c.json({ error: 'Failed to fetch sports' }, 500)
+  }
+})
+
+// GET /api/sports/configs/:sportType - Get specific sport configuration
+apiRoutes.get('/sports/configs/:sportType', async (c) => {
+  try {
+    const sportType = c.req.param('sportType')
+    
+    const sport = await c.env.DB.prepare(`
+      SELECT * FROM sport_configs WHERE sport_type = ?
+    `).bind(sportType).first()
+
+    if (!sport) {
+      return c.json({ error: 'Sport type not found' }, 404)
+    }
+
+    return c.json({
+      success: true,
+      sport: {
+        id: sport.id,
+        type: sport.sport_type,
+        name: sport.display_name,
+        icon: sport.icon_name,
+        primaryColor: sport.primary_color,
+        secondaryColor: sport.secondary_color,
+        metricTemplate: JSON.parse(sport.metric_template as string),
+        uiTheme: JSON.parse(sport.ui_theme as string)
+      }
+    })
+  } catch (error) {
+    console.error('Failed to fetch sport config:', error)
+    return c.json({ error: 'Failed to fetch sport' }, 500)
   }
 })
 

@@ -474,6 +474,17 @@ dashboardRoutes.get('/ai-generator', (c) => {
                             </h2>
 
                             <form id="workoutForm">
+                                <!-- OMNI-SPORT: Sport Modality Selector -->
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium mb-2 text-gray-300">
+                                        <i class="fas fa-running mr-2"></i>Modalidade Esportiva
+                                    </label>
+                                    <select id="sportType" class="input-dark w-full px-4 py-3 rounded-lg" required onchange="updateSportUI()">
+                                        <option value="">Carregando modalidades...</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1" id="sportDescription">Selecione a modalidade do treino</p>
+                                </div>
+
                                 <!-- Student Selection -->
                                 <div class="mb-6">
                                     <label class="block text-sm font-medium mb-2 text-gray-300">
@@ -484,61 +495,60 @@ dashboardRoutes.get('/ai-generator', (c) => {
                                     </select>
                                 </div>
 
-                                <!-- Workout Type -->
+                                <!-- Experience Level -->
                                 <div class="mb-6">
                                     <label class="block text-sm font-medium mb-2 text-gray-300">
-                                        <i class="fas fa-dumbbell mr-2"></i>Tipo de Treino
+                                        <i class="fas fa-chart-line mr-2"></i>Nível de Experiência
                                     </label>
-                                    <select id="workoutType" class="input-dark w-full px-4 py-3 rounded-lg" required>
-                                        <option value="hipertrofia">Hipertrofia</option>
-                                        <option value="emagrecimento">Emagrecimento</option>
-                                        <option value="condicionamento">Condicionamento</option>
-                                        <option value="forca">Força</option>
-                                        <option value="funcional">Funcional</option>
+                                    <select id="experienceLevel" class="input-dark w-full px-4 py-3 rounded-lg" required>
+                                        <option value="beginner">Iniciante</option>
+                                        <option value="intermediate" selected>Intermediário</option>
+                                        <option value="advanced">Avançado</option>
+                                        <option value="elite">Elite/Competição</option>
                                     </select>
                                 </div>
 
-                                <!-- Muscle Focus -->
-                                <div class="mb-6">
+                                <!-- Dynamic Focus Field (changes based on sport) -->
+                                <div class="mb-6" id="dynamicFocusContainer">
                                     <label class="block text-sm font-medium mb-2 text-gray-300">
-                                        <i class="fas fa-crosshairs mr-2"></i>Foco Muscular
+                                        <i class="fas fa-crosshairs mr-2"></i>
+                                        <span id="focusLabel">Foco do Treino</span>
                                     </label>
                                     <input 
                                         type="text" 
-                                        id="muscleFocus" 
+                                        id="focusField" 
                                         class="input-dark w-full px-4 py-3 rounded-lg"
-                                        placeholder="Ex: Peito e Tríceps, Posteriores de Coxa, etc."
+                                        placeholder="Ex: Peito e Tríceps, Treino A..."
                                         required
                                     />
+                                    <p class="text-xs text-gray-500 mt-1" id="focusHint"></p>
                                 </div>
 
-                                <!-- Duration -->
+                                <!-- Duration / Distance (dynamic) -->
                                 <div class="mb-6">
                                     <label class="block text-sm font-medium mb-2 text-gray-300">
-                                        <i class="fas fa-clock mr-2"></i>Duração (minutos)
+                                        <i class="fas fa-clock mr-2"></i>
+                                        <span id="durationLabel">Duração (minutos)</span>
                                     </label>
                                     <input 
-                                        type="number" 
+                                        type="text" 
                                         id="duration" 
                                         class="input-dark w-full px-4 py-3 rounded-lg"
                                         placeholder="45"
-                                        min="15"
-                                        max="120"
                                         value="45"
                                         required
                                     />
+                                    <p class="text-xs text-gray-500 mt-1" id="durationHint"></p>
                                 </div>
 
-                                <!-- Equipment -->
+                                <!-- Equipment / Context (dynamic based on sport) -->
                                 <div class="mb-6">
                                     <label class="block text-sm font-medium mb-2 text-gray-300">
-                                        <i class="fas fa-tools mr-2"></i>Equipamentos Disponíveis
+                                        <i class="fas fa-tools mr-2"></i>
+                                        <span id="equipmentLabel">Contexto/Equipamento</span>
                                     </label>
                                     <select id="equipment" class="input-dark w-full px-4 py-3 rounded-lg" required>
-                                        <option value="completa">Academia Completa</option>
-                                        <option value="condominio">Academia de Condomínio</option>
-                                        <option value="casa">Treino em Casa (Básico)</option>
-                                        <option value="ao-ar-livre">Treino ao Ar Livre</option>
+                                        <option value="">Selecione primeiro a modalidade</option>
                                     </select>
                                 </div>
 
@@ -629,6 +639,177 @@ dashboardRoutes.get('/ai-generator', (c) => {
             }
 
             let currentWorkoutData = null;
+            let sportsConfig = [];
+            let currentSport = null;
+
+            // OMNI-SPORT: Load available sports
+            async function loadSports() {
+                try {
+                    const response = await axios.get('/api/sports/configs', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+
+                    sportsConfig = response.data.sports;
+                    const select = document.getElementById('sportType');
+                    
+                    select.innerHTML = '<option value="">Selecione a modalidade</option>' +
+                        sportsConfig.map(s => `<option value="${s.type}">${s.name}</option>`).join('');
+                } catch (error) {
+                    console.error('Error loading sports:', error);
+                    document.getElementById('sportType').innerHTML = '<option value="">Erro ao carregar modalidades</option>';
+                }
+            }
+
+            // OMNI-SPORT: Update UI based on selected sport
+            function updateSportUI() {
+                const sportType = document.getElementById('sportType').value;
+                if (!sportType) return;
+
+                currentSport = sportsConfig.find(s => s.type === sportType);
+                if (!currentSport) return;
+
+                // Update sport description
+                document.getElementById('sportDescription').textContent = 
+                    `Gerando treino otimizado para ${currentSport.name}`;
+
+                // Update dynamic focus field based on sport
+                const focusConfigs = {
+                    bodybuilding: {
+                        label: 'Foco Muscular',
+                        placeholder: 'Ex: Peito e Tríceps, Treino A (Push)',
+                        hint: 'Especifique grupos musculares ou divisão de treino'
+                    },
+                    cycling: {
+                        label: 'Tipo de Treino',
+                        placeholder: 'Ex: Intervalos de potência, Endurance, Sweet Spot',
+                        hint: 'Defina o objetivo da sessão (FTP, Limiar, Resistência)'
+                    },
+                    tennis: {
+                        label: 'Foco Técnico',
+                        placeholder: 'Ex: Saque e Voleio, Forehand, Condicionamento',
+                        hint: 'Especifique golpes, táticas ou preparação física'
+                    },
+                    swimming: {
+                        label: 'Estilo e Objetivo',
+                        placeholder: 'Ex: Crawl - Técnica, Medley - Resistência',
+                        hint: 'Defina nado e foco (técnica, velocidade, resistência)'
+                    },
+                    beach_tennis: {
+                        label: 'Foco do Treino',
+                        placeholder: 'Ex: Smash, Defesa, Condicionamento na Areia',
+                        hint: 'Especifique golpes ou preparação específica'
+                    },
+                    crossfit: {
+                        label: 'Tipo de WOD',
+                        placeholder: 'Ex: AMRAP, For Time, EMOM, Benchmark',
+                        hint: 'Defina formato e foco (ginástica, levantamento, metcon)'
+                    },
+                    running: {
+                        label: 'Tipo de Sessão',
+                        placeholder: 'Ex: Intervalados, Fartlek, Long Run',
+                        hint: 'Especifique treino (velocidade, resistência, recuperação)'
+                    },
+                    pilates: {
+                        label: 'Área de Foco',
+                        placeholder: 'Ex: Core, Alongamento, Postura',
+                        hint: 'Defina região ou objetivo (força, flexibilidade, reab)'
+                    },
+                    physiotherapy: {
+                        label: 'Região e Objetivo',
+                        placeholder: 'Ex: Ombro - Reabilitação, Joelho - Fortalecimento',
+                        hint: 'Especifique área lesionada e fase do tratamento'
+                    }
+                };
+
+                const config = focusConfigs[sportType] || focusConfigs.bodybuilding;
+                document.getElementById('focusLabel').textContent = config.label;
+                document.getElementById('focusField').placeholder = config.placeholder;
+                document.getElementById('focusHint').textContent = config.hint;
+
+                // Update duration label and hints
+                const durationConfigs = {
+                    cycling: { label: 'Duração ou Distância', placeholder: '90min ou 80km', hint: 'Aceita tempo (min) ou distância (km)' },
+                    swimming: { label: 'Distância Total', placeholder: '3000m', hint: 'Em metros (ex: 2000m, 3500m)' },
+                    running: { label: 'Distância ou Duração', placeholder: '10km ou 60min', hint: 'Aceita distância (km) ou tempo (min)' },
+                    tennis: { label: 'Duração da Sessão', placeholder: '90min', hint: 'Inclui aquecimento, drills e jogo' },
+                    beach_tennis: { label: 'Duração da Sessão', placeholder: '60min', hint: 'Inclui aquecimento e jogo' },
+                    crossfit: { label: 'Time Cap', placeholder: '20min', hint: 'Tempo máximo para completar o WOD' },
+                    pilates: { label: 'Duração da Aula', placeholder: '60min', hint: 'Sessão completa com respiração' },
+                    physiotherapy: { label: 'Duração da Sessão', placeholder: '45min', hint: 'Inclui avaliação e exercícios' }
+                };
+
+                const durationConfig = durationConfigs[sportType];
+                if (durationConfig) {
+                    document.getElementById('durationLabel').textContent = durationConfig.label;
+                    document.getElementById('duration').placeholder = durationConfig.placeholder;
+                    document.getElementById('durationHint').textContent = durationConfig.hint;
+                } else {
+                    document.getElementById('durationLabel').textContent = 'Duração (minutos)';
+                    document.getElementById('duration').placeholder = '45';
+                    document.getElementById('durationHint').textContent = '';
+                }
+
+                // Update equipment options based on sport
+                const equipmentOptions = {
+                    bodybuilding: [
+                        { value: 'completa', label: 'Academia Completa' },
+                        { value: 'condominio', label: 'Academia de Condomínio' },
+                        { value: 'casa', label: 'Treino em Casa (Básico)' },
+                        { value: 'ao-ar-livre', label: 'Treino ao Ar Livre' }
+                    ],
+                    cycling: [
+                        { value: 'indoor', label: 'Indoor (Rolo/Smart Trainer)' },
+                        { value: 'outdoor-flat', label: 'Outdoor - Terreno Plano' },
+                        { value: 'outdoor-hilly', label: 'Outdoor - Montanha/Subidas' },
+                        { value: 'mixed', label: 'Treino Misto' }
+                    ],
+                    tennis: [
+                        { value: 'full-court', label: 'Quadra Completa' },
+                        { value: 'half-court', label: 'Meia Quadra' },
+                        { value: 'wall', label: 'Treino na Parede' },
+                        { value: 'physical', label: 'Preparação Física (sem quadra)' }
+                    ],
+                    swimming: [
+                        { value: 'pool-50m', label: 'Piscina Olímpica (50m)' },
+                        { value: 'pool-25m', label: 'Piscina Semi-Olímpica (25m)' },
+                        { value: 'pool-basic', label: 'Piscina Básica' },
+                        { value: 'open-water', label: 'Águas Abertas' }
+                    ],
+                    beach_tennis: [
+                        { value: 'sand-court', label: 'Quadra na Areia' },
+                        { value: 'gym', label: 'Academia (Condicionamento)' },
+                        { value: 'beach', label: 'Praia (Treino Funcional)' }
+                    ],
+                    crossfit: [
+                        { value: 'full-box', label: 'Box Completo' },
+                        { value: 'garage-gym', label: 'Garage Gym' },
+                        { value: 'minimal', label: 'Setup Mínimo' },
+                        { value: 'bodyweight', label: 'Apenas Peso Corporal' }
+                    ],
+                    running: [
+                        { value: 'track', label: 'Pista de Atletismo' },
+                        { value: 'road', label: 'Asfalto/Rua' },
+                        { value: 'trail', label: 'Trail/Montanha' },
+                        { value: 'treadmill', label: 'Esteira' }
+                    ],
+                    pilates: [
+                        { value: 'mat', label: 'Mat Pilates' },
+                        { value: 'reformer', label: 'Reformer' },
+                        { value: 'cadillac', label: 'Cadillac' },
+                        { value: 'mixed', label: 'Equipamentos Variados' }
+                    ],
+                    physiotherapy: [
+                        { value: 'clinic', label: 'Clínica Completa' },
+                        { value: 'home', label: 'Programa Domiciliar' },
+                        { value: 'basic', label: 'Equipamento Básico' }
+                    ]
+                };
+
+                const options = equipmentOptions[sportType] || equipmentOptions.bodybuilding;
+                document.getElementById('equipment').innerHTML = options.map(opt => 
+                    `<option value="${opt.value}">${opt.label}</option>`
+                ).join('');
+            }
 
             // Load students
             async function loadStudents() {
