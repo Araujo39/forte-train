@@ -18,6 +18,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 - **🆕 Super Admin Dashboard**: Visão macro do negócio com métricas financeiras (MRR/ARR), health score e impersonation
 - **🆕 Student Details Page**: Página completa de detalhes do aluno com fotos de progresso, medições corporais e metas
 - **✨ Elite UI/UX 'Carbon Performance'**: Student Dashboard refatorado com glassmorphism, gradientes neon, badges 3D metálicos e Timeline de Transformação
+- **🏆 Omni-Sport Platform**: Suporte a 9 modalidades esportivas (Musculação, Ciclismo, Corrida, Tênis, Beach Tennis, Natação, CrossFit, Pilates, Fisioterapia) com prompts IA especializados e métricas JSONB dinâmicas
 
 ## 🌐 URLs do Projeto
 
@@ -43,7 +44,7 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/dashboard` | Dashboard principal do Personal |
 | `/dashboard/students` | Gestão completa de alunos |
 | `/dashboard/workouts` | **Treinos Salvos** |
-| `/dashboard/ai-generator` | **Gerador de Treinos IA** |
+| `/dashboard/ai-generator` | **Gerador de Treinos IA Omni-Sport** 🏆 |
 | `/dashboard/analytics` | **Analytics com gráficos** |
 | `/dashboard/notifications` | **Sistema de Notificações WhatsApp** |
 | `/dashboard/settings` | **Configurações e API Keys** |
@@ -54,7 +55,8 @@ O **ForteTrain** é um ecossistema digital B2B2C que permite a Personal Trainers
 | `/api/dashboard/stats` | Estatísticas do dashboard |
 | `/api/students` | Gestão de alunos (CRUD) |
 | `/api/workouts` | Gestão de treinos (CRUD) |
-| `/api/ai/generate-workout` | Gerador de treinos com IA |
+| `/api/ai/generate-workout` | Gerador de treinos com IA Omni-Sport 🏆 |
+| `/api/sports/configs` | **🏆 Configurações de esportes (9 modalidades)** |
 | `/api/ai/identify-equipment` | **Módulo Vision - Identificação de equipamentos** |
 | `/api/notifications/history` | Histórico de notificações enviadas |
 | `/api/notifications/send` | Enviar notificação WhatsApp |
@@ -211,7 +213,8 @@ plan_limits (Configuração de planos)
 ```
 
 ### 📊 Estatísticas (Produção)
-- **22 tabelas** D1 (SQLite na edge)
+- **26 tabelas** D1 (SQLite na edge) - **+4 tabelas para Omni-Sport** 🏆
+- **9 modalidades esportivas** (Musculação, Ciclismo, Corrida, Tênis, Beach Tennis, Natação, CrossFit, Pilates, Fisioterapia)
 - **5 Personal Trainers** demo
 - **74 alunos** total
 - **7 fotos** de progresso
@@ -220,15 +223,24 @@ plan_limits (Configuração de planos)
 - **150 registros** de seed data
 - **MRR**: R$ 999.60
 - **ARR**: R$ 11,995.20
-- **Build size**: 411 KB (bundle SSR)
+- **Build size**: 517 KB (bundle SSR, +106 KB para Omni-Sport)
 
-### 📊 Principais Tabelas
+### 📍 Principais Tabelas
 
-- **tenants**: Personal Trainers (id, name, email, subdomain, plan_type)
-- **students**: Alunos vinculados ao tenant (id, tenant_id, full_name, goal, physical_data)
-- **workouts**: Treinos gerados por IA (id, student_id, exercises, ai_logic_used)
-- **ai_logs**: Logs de uso de IA para controle de custos
+**Tabelas Core:**
+- **tenants**: Personal Trainers (id, name, email, subdomain, plan_type, **specialization**, **supported_sports** 🏆)
+- **students**: Alunos vinculados ao tenant (id, tenant_id, full_name, goal, physical_data, **primary_sport** 🏆)
+- **workouts**: Treinos gerados por IA (id, student_id, exercises, ai_logic_used, **sport_type**, **metrics** 🏆)
+- **workout_sessions**: Sessões de treino (id, workout_id, student_id, exercises_completed, **sport_type**, **metrics_achieved** 🏆)
+- **ai_logs**: Logs de uso de IA para controle de custos (**sport_type** 🏆)
 - **ai_equipment_cache**: Cache de equipamentos identificados pelo Vision
+
+**🏆 Tabelas Omni-Sport (v8.0):**
+- **sport_configs**: Configuração de modalidades esportivas (9 esportes com cores, ícones, templates de métricas)
+- **sport_metrics_history**: Histórico de métricas por esporte e aluno (progressão de distância, potência, pace, etc.)
+- **sport_preferences**: Preferências de treino por esporte (frequência semanal, nível, equipamentos)
+
+**Tabelas Admin:**
 
 ## 🛠️ Stack Tecnológica
 
@@ -427,15 +439,21 @@ O ForteTrain foi desenvolvido para lançamento no Arnold Sports Festival 2026 em
 ## 📝 Notas de Desenvolvimento
 
 ### Última Atualização
-- **Data**: 2026-03-17
-- **Versão**: 1.5 MVP (Major Update)
-- **Status**: ✅ **95% Completo** - Pronto para demonstração
-- **Novidades**: 
-  - ✨ **Gerador de Treinos IA** completo e funcional
-  - ✨ **Gestão de Alunos** com filtros e cadastro
-  - ✨ **Módulo Vision** para identificação de equipamentos
-  - ✨ **WebApp do Aluno** com player de treino e câmera
-- **Próximos Passos**: Integração YouTube API real, notificações WhatsApp
+- **Data**: 2026-03-30
+- **Versão**: 8.0 Omni-Sport 🏆
+- **Status**: ✅ **99% Completo** - Plataforma multi-esporte em produção
+- **Novidades v8.0**: 
+  - 🏆 **Omni-Sport Architecture**: Suporte a 9 modalidades esportivas
+  - 🎯 **Métricas JSONB Dinâmicas**: Flexibilidade total por esporte
+  - 🤖 **Prompts IA Especializados**: Geração personalizada por modalidade
+  - 🎨 **Sport Theme System**: Cores e ícones dinâmicos por esporte
+  - 📊 **Sport Configs API**: Endpoint RESTful para configurações de esportes
+- **Novidades v7.0**: 
+  - ✨ **Elite UI/UX 'Carbon Performance'**: Student Dashboard refatorado
+  - 🔥 **Flame Counter Animado**: Gamificação de sequência de treinos
+  - 🏅 **Badges 3D Metálicos**: Sistema de conquistas visual
+  - 📸 **Timeline de Transformação**: Before/After com fotos side-by-side
+- **Próximos Passos**: Landing page Omni-Sport com tabs interativos, Student Dashboard com UI dinâmica por esporte
 
 ### Comandos Úteis
 
@@ -519,9 +537,202 @@ Copyright © 2026 ForteTrain. Todos os direitos reservados.
 - **Neon Green Gradient**: `#CCFF00 → #99FF00` (CTAs principais)
 - **Electric Blue**: `#00D4FF` (métricas de progresso)
 - **Fire Gradient**: `#FF6B35 → #FF4757` (streak e alertas)
-- **Warning Yellow**: `#FFCC00` (injury check-in)
+### 📊 Métricas de Performance
 
-### 📱 Student Dashboard - Carbon Performance
+- **Animations**: 12 tipos (pulse, glow, shimmer, rotate, flicker, fade)
+- **Glassmorphism**: 3 níveis (light, strong, nav)
+- **Gradients**: 8 combinações (neon, fire, blue, metallic)
+- **Charts**: 3 tipos (donut, bar, line) com customização avançada
+- **Responsive**: Mobile-first com breakpoints 640px
+- **Build Time**: ~3.6s (Vite SSR bundle)
+
+---
+
+## 🏆 Omni-Sport Architecture (v8.0)
+
+### 🎯 Visão Geral
+
+ForteTrain agora suporta **9 modalidades esportivas** com inteligência artificial especializada para cada esporte. A plataforma se adapta automaticamente ao contexto do atleta, gerando treinos otimizados com métricas específicas por modalidade.
+
+### 🏅 Esportes Suportados
+
+| Esporte | Icon | Cor Primária | Cor Secundária | Métricas Principais |
+|---------|------|--------------|----------------|---------------------|
+| **Musculação** | 🏋️ `dumbbell` | `#CCFF00` | `#99FF00` | séries, reps, carga, descanso |
+| **Ciclismo** | 🚴 `bike` | `#00D4FF` | `#0099CC` | distância, elevação, zonas FC, potência, cadência |
+| **Corrida** | 🏃 `footprints` | `#7CFC00` | `#32CD32` | distância, pace, intervalos, elevação, terreno |
+| **Tênis** | 🎾 `circle-dot` | `#FFD700` | `#FFA500` | drills, duração, intensidade, foco técnico |
+| **Beach Tennis** | ☀️ `sun` | `#FF6B35` | `#FF4757` | drills, cenários de jogo, saque, intensidade |
+| **Natação** | 🏊 `waves` | `#00CED1` | `#008B8B` | distância, nado, intervalos, foco técnico |
+| **CrossFit** | ⚡ `zap` | `#FF0000` | `#CC0000` | WOD type, movimentos, time cap, scaling |
+| **Pilates** | 🔵 `circle` | `#FF69B4` | `#FF1493` | repetições, duração, padrão respiratório, equipamento |
+| **Fisioterapia** | ❤️‍🩹 `heart-pulse` | `#9370DB` | `#6A5ACD` | exercícios, hold time, área alvo, nível de dor |
+
+### 🧠 Sistema de IA Especializado
+
+**Prompt Engineering por Esporte:**
+
+Cada modalidade tem um prompt especializado que instrui o GPT-4o-mini a:
+1. Usar terminologia técnica correta do esporte
+2. Respeitar fisiologia e biomecânica específica
+3. Gerar métricas adequadas (ex: zonas de potência no ciclismo, drills no tênis)
+4. Considerar equipamentos e contextos específicos
+
+**Exemplo - Ciclismo:**
+```typescript
+generateSportPrompt('cycling', {
+  focus: 'Treino de resistência aeróbica',
+  duration: '90 minutos',
+  equipment: 'Rolo de treino inteligente',
+  experienceLevel: 'intermediate'
+})
+// Retorna prompt otimizado com zonas de potência FTP, cadência, intervalos
+```
+
+**Exemplo - Tênis:**
+```typescript
+generateSportPrompt('tennis', {
+  focus: 'Forehand e footwork',
+  duration: '60 minutos',
+  equipment: 'Quadra de saibro',
+  experienceLevel: 'advanced'
+})
+// Retorna prompt com drills técnicos, padrões de jogo, work/rest ratios
+```
+
+### 📊 Métricas JSONB Dinâmicas
+
+**Antes (v7.0):**
+```sql
+workouts (
+  exercises TEXT -- JSON string fixo
+)
+```
+
+**Agora (v8.0):**
+```sql
+workouts (
+  sport_type TEXT,
+  metrics JSONB -- Estrutura flexível por esporte
+)
+```
+
+**Exemplo de métricas por esporte:**
+
+**Musculação:**
+```json
+{
+  "exercises": [
+    {"name": "Supino Reto", "sets": 4, "reps": 10, "weight": 80, "rest": 90}
+  ]
+}
+```
+
+**Ciclismo:**
+```json
+{
+  "distance": "50km",
+  "elevation": "800m",
+  "zones": {"Z2": "30min", "Z3": "20min"},
+  "avg_power": 250,
+  "avg_cadence": 90
+}
+```
+
+**Tênis:**
+```json
+{
+  "drills": [
+    {"type": "Forehand Cross Court", "duration": "15min", "intensity": "Alta", "repetitions": 50}
+  ],
+  "match_simulation": true
+}
+```
+
+### 🎨 Sport Theme System
+
+**Biblioteca JavaScript** (`/static/sport-theme.js`):
+- `getSportTheme(sportType)`: Retorna configuração de cores/ícones
+- `applySportTheme(element, sportType, options)`: Aplica tema a elemento
+- `createSportBadge(sportType, options)`: Gera badge animado
+- `renderSportMetric(sportType, label, value)`: Card de métrica temático
+- `createSportHeader(sportType, title)`: Header com ícone animado
+
+**Exemplo de uso:**
+```javascript
+const theme = getSportTheme('cycling');
+element.style.background = theme.gradient;
+element.style.boxShadow = `0 0 20px ${theme.glowColor}`;
+```
+
+### 🚀 API Endpoints Omni-Sport
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/api/sports/configs` | GET | Lista todas as configurações de esportes (cores, ícones, templates) |
+| `/api/ai/generate-workout` | POST | Gera treino com IA (agora aceita `sportType` e `experienceLevel`) |
+| `/api/workouts` | POST | Salva treino (agora aceita `sport_type` e `metrics` JSONB) |
+
+**Request Example:**
+```json
+{
+  "studentId": "student-123",
+  "sportType": "cycling",
+  "experienceLevel": "intermediate",
+  "prompt": "Treino de resistência aeróbica com foco em FTP..."
+}
+```
+
+**Response Example:**
+```json
+{
+  "success": true,
+  "workoutId": "workout-456",
+  "workout": {
+    "title": "Treino Intervalado FTP",
+    "description": "Sessão de 90min focada em zonas 3-4...",
+    "intervals": [
+      {"duration": "10min", "power_target": "200W", "heart_rate_zone": "Z2"},
+      {"duration": "5min", "power_target": "280W", "heart_rate_zone": "Z4"}
+    ]
+  }
+}
+```
+
+### 📋 Schema Changes (Migration 0006)
+
+**Colunas Adicionadas:**
+- `workouts.sport_type TEXT` - Tipo de esporte
+- `workouts.metrics JSONB` - Métricas dinâmicas
+- `students.primary_sport TEXT` - Esporte principal do aluno
+- `tenants.specialization TEXT` - Especialização do PT
+- `tenants.supported_sports TEXT` - Lista de esportes suportados (CSV)
+- `workout_sessions.sport_type TEXT` - Tipo do treino executado
+- `workout_sessions.metrics_achieved JSONB` - Métricas alcançadas na sessão
+- `ai_logs.sport_type TEXT` - Esporte do treino gerado
+
+**Novas Tabelas:**
+- `sport_configs`: 9 esportes pré-configurados (cores, ícones, templates)
+- `sport_metrics_history`: Histórico de progressão por esporte
+- `sport_preferences`: Preferências de treino do aluno por esporte
+
+### 🎯 Diferenças vs v7.0
+
+| Feature | v7.0 Elite | v8.0 Omni-Sport |
+|---------|-----------|-----------------|
+| Esportes | Musculação only | 9 modalidades |
+| Métricas | Séries/reps fixos | JSONB dinâmico |
+| IA Prompts | Genérico | Especializado por esporte |
+| UI Theme | Neon green fixo | Cores dinâmicas |
+| Icons | Dumbbell fixo | Ícone por esporte |
+| AI Generator | Básico | Sport selector + experience level |
+| Student Dashboard | Static | Dynamic (próxima fase) |
+| Landing Page | Corporate | Omni-Sport tabs (próxima fase) |
+| Build Size | 488.60 KB | 517 KB (+28 KB) |
+
+---
+
+
 
 #### **Header Elite**
 - ✨ **Saudação Dinâmica**: Muda com base no horário
