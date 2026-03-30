@@ -35,9 +35,11 @@ import pricingRoutes from './routes/pricing'
 import paymentsRoutes from './routes/payments'
 import { studentDetailRoutes } from './routes/student-detail'
 import { studentDashboardRoutes } from './routes/student-dashboard'
+import { omniSportLandingRoutes } from './routes/omni-sport-landing'
 
 // Mount routes
 app.route('/', landingRoutes)
+app.route('/omni-sport', omniSportLandingRoutes)
 app.route('/auth', authRoutes)
 app.route('/admin', adminRoutes)
 app.route('/pricing', pricingRoutes)
