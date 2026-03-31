@@ -11,7 +11,12 @@
     "deploy:prod": "npm run build && wrangler pages deploy dist --project-name fortetrain",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
-    "test": "curl http://localhost:3000",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen http://localhost:3000",
     "db:migrate:local": "wrangler d1 migrations apply fortetrain-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply fortetrain-db",
     "db:seed": "wrangler d1 execute fortetrain-db --local --file=./seed.sql",
@@ -25,10 +30,13 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260312.1",
     "@hono/vite-build": "^1.2.0",
-    "@hono/vite-dev-server": "^0.18.2",
     "@hono/vite-cloudflare-pages": "^0.4.2",
+    "@hono/vite-dev-server": "^0.18.2",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
+    "dotenv": "^17.3.1",
+    "typescript": "^5.7.3",
     "vite": "^6.3.5",
-    "wrangler": "^4.4.0",
-    "typescript": "^5.7.3"
+    "wrangler": "^4.4.0"
   }
 }

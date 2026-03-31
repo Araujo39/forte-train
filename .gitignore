@@ -36,3 +36,9 @@ logs/
 .idea/
 *.swp
 *.swo
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/playwright-results/
