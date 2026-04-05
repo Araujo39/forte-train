@@ -485,6 +485,58 @@ Copyright © 2026 ForteTrain. Todos os direitos reservados.
 
 ---
 
+## 🌐 Configuração de Domínio Customizado
+
+### 📚 Documentação DevOps
+
+O ForteTrain inclui guias completos para configuração de infraestrutura:
+
+- **[🚀 Quick Start - 15 minutos](docs/DEVOPS_QUICK_START.md)**: Guia rápido para configurar domínio customizado
+- **[📖 Guia Completo DevOps](docs/DEVOPS_CLOUDFLARE_DOMAIN.md)**: Documentação detalhada de DNS, SSL, Redirects e Multi-Tenant
+- **[🏗️ Arquitetura Multi-Tenant](docs/ARCHITECTURE_MULTI_TENANT.md)**: Diagramas e estratégias para subdomínios dinâmicos
+- **[🛠️ Scripts de Automação](scripts/README.md)**: Scripts bash para automação de tarefas DevOps
+
+### ⚡ Script de Configuração Automática
+
+```bash
+# Executar script interativo de configuração de domínio
+cd /home/user/webapp
+./scripts/setup-domain.sh
+```
+
+**Funcionalidades do Script**:
+- ✅ Verificar pré-requisitos (Node, npm, Wrangler)
+- 🔍 Verificar status DNS
+- ➕ Adicionar custom domains (root + www)
+- 🔒 Testar certificados SSL
+- 🔄 Testar redirects (www → root, HTTP → HTTPS)
+- 🌐 Testar aplicação em produção
+- 📊 Gerar relatório completo de status
+
+### 🎯 Roadmap de Domínio
+
+#### ✅ Fase 1: Configuração Básica (MVP)
+- [x] Cloudflare Pages deploy
+- [x] Documentação DevOps completa
+- [x] Script de automação
+- [ ] Custom domain: fortetrain.com
+- [ ] SSL/TLS configurado
+- [ ] Redirects: www → root
+
+#### 🚧 Fase 2: Multi-Tenant (Growth)
+- [ ] Wildcard DNS: *.fortetrain.com
+- [ ] Cloudflare Worker: subdomain-router
+- [ ] KV Namespace: tenant registry
+- [ ] Subdomains dinâmicos: andre.fortetrain.com, maria.fortetrain.com
+
+#### 🔮 Fase 3: Escala (Production)
+- [ ] Custom CSS por tenant
+- [ ] White-label branding
+- [ ] API para criar tenants
+- [ ] Analytics por subdomain
+
+---
+
 **Desenvolvido com ❤️ e ☕ por André Silva**
 
 *Transformando Personal Trainers em empresas de alta performance através da Inteligência Artificial*
