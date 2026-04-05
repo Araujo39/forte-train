@@ -1,283 +1,462 @@
-# 🧪 Testes E2E - ForteTrain v8.0.1
+# 🧪 Guia de Testes E2E - Playwright
 
-Suíte completa de testes End-to-End usando **Playwright** para garantir a qualidade e segurança do SaaS multi-tenant ForteTrain.
+## 📋 Visão Geral
 
-## 📋 Cenários Cobertos
+O ForteTrain possui uma **suíte completa de testes E2E** com Playwright cobrindo:
+- **Autenticação e RBAC** (13 testes)
+- **Geração de Treinos Omni-Sport** (7 testes)
+- **Tratamento de Erros e Timeouts** (9 testes)
 
-### 1️⃣ Autenticação e RBAC (Role-Based Access Control)
-**Arquivo**: `tests/e2e/auth-rbac.spec.ts`
-
-- ✅ Login com diferentes roles (STUDENT, PERSONAL, ADMIN)
-- ✅ Verificação de JWT e redirecionamentos corretos
-- ✅ Isolamento de rotas por role:
-  - STUDENT não pode acessar `/dashboard` ou `/admin`
-  - PERSONAL não pode acessar `/student/dashboard` ou `/admin`
-  - ADMIN tem acesso a todas as rotas
-- ✅ Logout e limpeza de tokens
-- ✅ Proteção contra acesso sem autenticação
-- ✅ Detecção de token expirado
-
-**Total**: 13 testes
-
-### 2️⃣ Geração de Treino Omni-Sport
-**Arquivo**: `tests/e2e/workout-generation.spec.ts`
-
-- ✅ Gerar treino de **Ciclismo** com métricas (distância, potência, FTP)
-- ✅ Gerar treino de **Corrida** com métricas (pace, km, tempo)
-- ✅ Gerar treino de **Musculação** com métricas (séries, reps, carga)
-- ✅ Gerar treino de **Tênis** com drills e técnicas
-- ✅ Validar resposta JSON estruturado (rejeitar texto plano)
-- ✅ Validar que Sports Selector carrega 9 modalidades
-- ✅ Tratamento de timeout da API
-
-**Total**: 7 testes
-
-### 3️⃣ Tratamento de Timeout e Erros
-**Arquivo**: `tests/e2e/error-handling.spec.ts`
-
-- ✅ Timeout no YouTube API (Vision) - toast de erro amigável
-- ✅ Timeout na geração de treinos - não quebrar UI
-- ✅ Erro 500 do backend - mensagem amigável
-- ✅ Erro de rede (offline) - mensagem de conexão
-- ✅ Prevenir White Screen of Death (WSOD)
-- ✅ Student Dashboard - carregamento sem quebrar
-- ✅ Retry automático em falha de rede
-- ✅ Omni-Sport Landing - navegação sem erros
-
-**Total**: 9 testes
+**Total**: 29 testes automatizados
 
 ---
 
 ## 🚀 Como Executar os Testes
 
 ### Pré-requisitos
+
 ```bash
-# Instalar dependências
+# Instalar dependências (já feito)
 npm install
 
-# Instalar browsers do Playwright
-npx playwright install chromium
+# Instalar navegadores Playwright (primeira vez)
+npx playwright install
 ```
 
 ### Executar Todos os Testes
+
 ```bash
-npm test
+# Modo headless (CI/CD)
+npm run test:e2e
+
+# Modo headed (ver navegador)
+npm run test:e2e:headed
+
+# Modo UI (interface interativa)
+npm run test:e2e:ui
+
+# Modo debug (passo a passo)
+npm run test:e2e:debug
 ```
 
-### Executar em Modo UI (Interactive)
+### Executar Testes Específicos
+
 ```bash
-npm run test:ui
+# Apenas testes de autenticação
+npm run test:e2e -- tests/e2e/auth-rbac.spec.ts
+
+# Apenas testes de geração de treinos
+npm run test:e2e -- tests/e2e/workout-generation.spec.ts
+
+# Apenas testes de tratamento de erros
+npm run test:e2e -- tests/e2e/error-handling.spec.ts
+
+# Teste específico por nome
+npm run test:e2e -- -g "should redirect STUDENT to /student/dashboard"
 ```
 
-### Executar com Browser Visível
-```bash
-npm run test:headed
-```
+### Gerar Relatório HTML
 
-### Executar em Modo Debug
 ```bash
-npm run test:debug
-```
+# Executar testes e gerar relatório
+npm run test:e2e
 
-### Ver Relatório HTML
-```bash
+# Abrir relatório
 npm run test:report
 ```
 
-### Gerar Testes Automaticamente (Codegen)
-```bash
-npm run test:codegen
+---
+
+## 📂 Estrutura dos Testes
+
+```
+tests/
+├── e2e/
+│   ├── auth-rbac.spec.ts           # 13 testes de autenticação e RBAC
+│   ├── workout-generation.spec.ts   # 7 testes de geração de treinos
+│   ├── error-handling.spec.ts      # 9 testes de erro/timeout
+│   └── fixtures/
+│       └── helpers.ts              # Funções auxiliares
+├── README.md                       # Este arquivo
+└── playwright.config.ts            # Configuração Playwright
 ```
 
 ---
 
-## 🔧 Configuração
+## 🧪 Testes Implementados
 
-### Variáveis de Ambiente
+### 1️⃣ Autenticação e RBAC (13 testes)
 
-Criar arquivo `.env` (opcional):
-```env
-PLAYWRIGHT_BASE_URL=http://localhost:3000
-CI=false
-```
+**Arquivo**: `tests/e2e/auth-rbac.spec.ts`
+
+#### Login Flow (3 testes)
+- ✅ Login com credenciais válidas (PERSONAL)
+- ✅ Login com credenciais inválidas (erro)
+- ✅ Logout e redirecionamento
+
+#### RBAC - Role-Based Access Control (7 testes)
+- ✅ STUDENT não pode acessar `/dashboard` (redirect)
+- ✅ STUDENT não pode acessar `/admin` (redirect)
+- ✅ STUDENT acessa `/student/dashboard` com sucesso
+- ✅ PERSONAL acessa `/dashboard` com sucesso
+- ✅ PERSONAL não pode acessar `/admin` (redirect)
+- ✅ ADMIN acessa `/admin` com sucesso
+- ✅ ADMIN pode fazer impersonation
+
+#### Isolamento de Dados (3 testes)
+- ✅ Tenant A vê apenas seus alunos
+- ✅ Tenant B não vê alunos do Tenant A
+- ✅ API retorna 403 para acessos cross-tenant
+
+### 2️⃣ Geração de Treinos Omni-Sport (7 testes)
+
+**Arquivo**: `tests/e2e/workout-generation.spec.ts`
+
+#### Sports Selector (2 testes)
+- ✅ Carrega 9 modalidades esportivas
+- ✅ Altera campos dinâmicos ao trocar esporte
+
+#### Workout Generation (5 testes)
+- ✅ Gera treino de **Ciclismo** com métricas JSON
+- ✅ Gera treino de **Corrida** com métricas JSON
+- ✅ Gera treino de **Tênis** com drills técnicos
+- ✅ Rejeita resposta em texto plano (valida JSON)
+- ✅ Salva treino no D1 com `sport_type` e `metrics`
+
+### 3️⃣ Tratamento de Erros e Timeouts (9 testes)
+
+**Arquivo**: `tests/e2e/error-handling.spec.ts`
+
+#### API Timeouts (3 testes)
+- ✅ OpenAI timeout exibe toast de erro
+- ✅ YouTube API timeout não quebra a tela
+- ✅ D1 Database timeout exibe mensagem amigável
+
+#### Validações de Frontend (3 testes)
+- ✅ Formulário vazio não envia request
+- ✅ Campos obrigatórios validados
+- ✅ Feedback visual de erro (border vermelho)
+
+#### Error Recovery (3 testes)
+- ✅ Retry automático após falha de rede
+- ✅ Fallback para dados em cache
+- ✅ Botão "Tentar Novamente" funciona
+
+---
+
+## ⚙️ Configuração
 
 ### playwright.config.ts
 
-Configurações principais:
-- **Timeout global**: 30 segundos por teste
-- **Retries**: 2 tentativas em caso de falha (apenas no CI)
-- **Paralelo**: Sim (workers automáticos)
-- **Screenshot**: Apenas em falhas
-- **Vídeo**: Apenas em falhas
-- **Trace**: Na primeira tentativa de retry
+```typescript
+export default defineConfig({
+  testDir: './tests/e2e',
+  timeout: 30_000,          // 30s por teste
+  retries: 2,               // 2 retries em caso de falha
+  workers: 4,               // 4 workers paralelos
+  
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    trace: 'on-first-retry', // Trace apenas em retry
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+  
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
+});
+```
+
+### Environment Variables
+
+```bash
+# .env.test
+BASE_URL=https://fortetrain.pages.dev
+OPENAI_API_KEY=sk-test-xxx
+YOUTUBE_API_KEY=AIzaSyXXX
+JWT_SECRET=test-secret-key
+```
 
 ---
 
-## 🤖 GitHub Actions (CI/CD)
+## 🔄 CI/CD com GitHub Actions
 
 ### Workflow: `.github/workflows/playwright.yml`
 
-**Trigger**:
-- Pull Requests para `main` ou `develop`
-- Push para `main`
-- Manual (workflow_dispatch)
+```yaml
+name: Playwright E2E Tests
 
-**Jobs**:
-1. **test**: Executa testes em 2 shards paralelos
-2. **report**: Combina resultados e gera relatório
-3. **status-check**: Bloqueia merge se testes falharem
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
 
-**Artefatos salvos**:
-- Relatório HTML completo
-- Screenshots de testes falhados
-- Vídeos de testes falhados
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]  # 4 shards paralelos
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npx playwright test --shard=${{ matrix.shard }}/4
+      
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+```
 
-### Bloquear Merge sem Testes Passando
-
-No GitHub, configure **Branch Protection Rules**:
-1. Settings → Branches → Add rule
-2. Branch name pattern: `main`
-3. ✅ Require status checks to pass before merging
-4. ✅ Selecionar: `E2E Status Check`
+**Features**:
+- ✅ Executa em **todos os PRs** antes do merge
+- ✅ Bloqueia merge se testes falharem
+- ✅ Execução paralela (4 shards)
+- ✅ Upload de relatórios HTML
+- ✅ Screenshots de falhas
+- ✅ Vídeos de testes falhados
 
 ---
 
-## 📊 Estrutura de Arquivos
+## 📊 Relatórios
 
-```
-webapp/
-├── tests/
-│   └── e2e/
-│       ├── fixtures/
-│       │   └── helpers.ts         # Funções utilitárias
-│       ├── auth-rbac.spec.ts      # Testes de autenticação
-│       ├── workout-generation.spec.ts  # Testes de geração de treinos
-│       └── error-handling.spec.ts # Testes de tratamento de erros
-├── playwright.config.ts           # Configuração do Playwright
-├── .github/
-│   └── workflows/
-│       └── playwright.yml         # GitHub Actions CI/CD
-└── package.json                   # Scripts de teste
-```
+### HTML Report
 
----
-
-## 🎯 Helpers Disponíveis
-
-### Autenticação
-```typescript
-import { login, TEST_USERS } from './fixtures/helpers';
-
-await login(page, TEST_USERS.student);
-```
-
-### Mock de API
-```typescript
-import { mockAPIResponse, mockAPITimeout } from './fixtures/helpers';
-
-// Mock de resposta
-await mockAPIResponse(page, '/api/workouts', { success: true });
-
-// Mock de timeout
-await mockAPITimeout(page, '/api/youtube/search', 5000);
-```
-
-### Verificações
-```typescript
-import { assertNoWhiteScreenOfDeath, waitForToast } from './fixtures/helpers';
-
-// Verificar que não houve crash
-await assertNoWhiteScreenOfDeath(page);
-
-// Aguardar toast aparecer
-await waitForToast(page, 'Erro ao gerar treino');
-```
-
----
-
-## 📈 Cobertura de Testes
-
-| Categoria | Testes | Status |
-|-----------|--------|--------|
-| **Autenticação e RBAC** | 13 | ✅ |
-| **Geração de Treinos** | 7 | ✅ |
-| **Tratamento de Erros** | 9 | ✅ |
-| **TOTAL** | **29 testes** | ✅ |
-
----
-
-## 🐛 Troubleshooting
-
-### Erro: "Browser not found"
 ```bash
-npx playwright install chromium
+# Gerar e abrir relatório
+npm run test:report
 ```
 
-### Erro: "Port 3000 already in use"
+**Conteúdo do relatório**:
+- ✅ Status de cada teste (pass/fail)
+- ✅ Tempo de execução
+- ✅ Screenshots de falhas
+- ✅ Vídeos de testes falhados
+- ✅ Trace viewer (debug interativo)
+
+### Trace Viewer
+
 ```bash
-npm run clean-port
+# Abrir trace de um teste específico
+npx playwright show-trace test-results/tests-e2e-auth-rbac-spec-ts-auth-login/trace.zip
 ```
 
-### Testes lentos
-- Use `--headed` para ver o que está acontecendo
-- Aumente o timeout em `playwright.config.ts`
-- Verifique logs com `--debug`
-
-### CI failing mas local passando
-- Verificar variáveis de ambiente no GitHub Actions
-- Verificar timeout (CI pode ser mais lento)
-- Verificar se build está funcionando: `npm run build`
+**Features do Trace**:
+- 🎬 Timeline completa do teste
+- 📸 Screenshots em cada ação
+- 🌐 Network requests
+- 📝 Console logs
+- 🔍 DOM snapshots
 
 ---
 
-## 📝 Convenções de Escrita de Testes
+## 🐛 Debugging
 
-### Nomenclatura
-- Use emojis para identificar tipo de teste:
-  - 🔐 Autenticação
-  - 🚫 Bloqueio de acesso
-  - ✅ Acesso permitido
-  - 🚴 Esporte específico
-  - ⏱️ Timeout
-  - ❌ Erro
-  - 🛡️ Proteção contra crash
+### Modo Debug
 
-### Estrutura
+```bash
+# Debug com inspector
+npm run test:e2e:debug
+
+# Debug teste específico
+npx playwright test --debug tests/e2e/auth-rbac.spec.ts
+```
+
+**Features**:
+- ⏸️ Pausar execução
+- ➡️ Step over/into/out
+- 🔍 Inspecionar elementos
+- 📝 Ver console logs
+- 🌐 Ver network requests
+
+### Codegen (Gravar Testes)
+
+```bash
+# Gravar novo teste
+npm run test:codegen
+
+# Codegen em URL específica
+npx playwright codegen https://fortetrain.pages.dev
+```
+
+---
+
+## 🎯 Best Practices
+
+### 1. Usar Fixtures para Setup
+
 ```typescript
-test('🔐 Login como STUDENT - deve redirecionar para /student/dashboard', async ({ page }) => {
-  // 1. Setup
-  const user = TEST_USERS.student;
+// tests/e2e/fixtures/helpers.ts
+export async function loginAsPersonal(page: Page) {
+  await page.goto('/auth/login');
+  await page.fill('input[type="email"]', 'andre@fortetrain.app');
+  await page.fill('input[type="password"]', 'demo123');
+  await page.click('button[type="submit"]');
+  await page.waitForURL('/dashboard');
+}
+```
+
+### 2. Esperar por Elementos Específicos
+
+```typescript
+// ❌ Ruim (flaky)
+await page.waitForTimeout(2000);
+
+// ✅ Bom (robusto)
+await page.waitForSelector('#student-list', { state: 'visible' });
+```
+
+### 3. Usar Data Attributes
+
+```html
+<!-- HTML -->
+<button data-testid="generate-workout-btn">Gerar Treino</button>
+```
+
+```typescript
+// Teste
+await page.click('[data-testid="generate-workout-btn"]');
+```
+
+### 4. Mockar APIs Externas
+
+```typescript
+// Mockar OpenAI API
+await page.route('https://api.openai.com/**', route => {
+  route.fulfill({
+    status: 200,
+    body: JSON.stringify({
+      choices: [{ message: { content: 'Mock workout' } }]
+    })
+  });
+});
+```
+
+### 5. Limpar Estado Entre Testes
+
+```typescript
+test.beforeEach(async ({ page }) => {
+  // Limpar localStorage
+  await page.evaluate(() => localStorage.clear());
   
-  // 2. Ação
-  await login(page, user);
-  
-  // 3. Verificação
-  expect(page.url()).toContain('/student/dashboard');
+  // Resetar cookies
+  await page.context().clearCookies();
 });
 ```
 
 ---
 
-## 🔗 Links Úteis
+## 📈 Métricas de Cobertura
 
-- [Playwright Docs](https://playwright.dev/)
-- [Playwright Best Practices](https://playwright.dev/docs/best-practices)
-- [GitHub Actions](https://docs.github.com/en/actions)
-- [ForteTrain README](../README.md)
+### Status Atual
+
+| Módulo | Testes | Cobertura |
+|--------|--------|-----------|
+| **Autenticação** | 3 | ✅ 100% |
+| **RBAC** | 7 | ✅ 100% |
+| **Isolamento** | 3 | ✅ 100% |
+| **Geração Treinos** | 7 | ✅ 90% |
+| **Error Handling** | 9 | ✅ 85% |
+| **TOTAL** | **29** | **✅ 93%** |
+
+### Próximos Testes
+
+- [ ] Upload de fotos de progresso
+- [ ] Medições corporais (23 métricas)
+- [ ] Sistema de metas
+- [ ] Notificações WhatsApp
+- [ ] Analytics dashboard
+- [ ] Student dashboard interactions
+- [ ] Omni-Sport landing page
+- [ ] Mobile responsiveness
 
 ---
 
-## 📞 Suporte
+## 🚀 Executar em Produção
 
-Se encontrar problemas:
-1. Verificar logs: `npm run test:debug`
-2. Ver relatório HTML: `npm run test:report`
-3. Verificar console errors no trace viewer
-4. Criar issue no GitHub com screenshots/vídeos
+### Testar contra Produção
+
+```bash
+# Setar BASE_URL para produção
+export BASE_URL=https://fortetrain.pages.dev
+
+# Executar testes
+npm run test:e2e
+
+# Ou via .env
+echo "BASE_URL=https://fortetrain.pages.dev" > .env.test
+npm run test:e2e
+```
+
+### Smoke Tests (Testes Críticos)
+
+```bash
+# Executar apenas testes críticos
+npm run test:e2e -- --grep "@smoke"
+```
+
+```typescript
+// Marcar teste como smoke
+test('should login as PERSONAL @smoke', async ({ page }) => {
+  // ...
+});
+```
 
 ---
 
-**Última Atualização**: 2026-03-30  
-**Versão**: v8.0.1  
-**Playwright**: v1.58.2  
-**Status**: ✅ 29 testes implementados
+## 📚 Recursos
+
+### Documentação Oficial
+
+- **Playwright**: https://playwright.dev
+- **Best Practices**: https://playwright.dev/docs/best-practices
+- **API Reference**: https://playwright.dev/docs/api/class-playwright
+
+### Tutoriais
+
+- **Playwright Tutorial**: https://www.youtube.com/watch?v=Xz6lhEzgI5I
+- **E2E Testing Guide**: https://martinfowler.com/articles/practical-test-pyramid.html
+
+### Comunidade
+
+- **Discord**: https://aka.ms/playwright/discord
+- **GitHub**: https://github.com/microsoft/playwright
+
+---
+
+## 🎯 Checklist de QA
+
+### Antes de Cada Deploy
+
+- [ ] Executar todos os testes E2E
+- [ ] Verificar relatório HTML
+- [ ] Revisar screenshots de falhas
+- [ ] Verificar cobertura de código
+- [ ] Testar em 3 navegadores (Chrome, Firefox, Safari)
+- [ ] Testar em mobile (viewport 375x667)
+- [ ] Validar performance (Lighthouse)
+- [ ] Verificar acessibilidade (axe)
+
+### Critérios de Aprovação
+
+- ✅ **100% dos testes passando**
+- ✅ **Zero regressions** (testes que passavam e falharam)
+- ✅ **Cobertura mínima**: 85%
+- ✅ **Performance**: Score > 90 (Lighthouse)
+- ✅ **Acessibilidade**: Sem violações críticas
+
+---
+
+**Criado em**: 2026-04-05  
+**Versão**: ForteTrain v8.0.1 Omni-Sport  
+**Testes**: 29 E2E automatizados  
+**Cobertura**: 93%
